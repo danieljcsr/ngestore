@@ -33,13 +33,27 @@ export async function POST(request: Request) {
       statusResponse.fraud_status,
     );
 
+    // Defense in depth: never mark an order PAID for less (or more) than it was
+    // actually created for. In normal operation this can't happen — the Snap
+    // transaction is always created server-side with the order's real amount —
+    // but a webhook should never blindly trust an incoming amount for something
+    // as consequential as "did this order get paid".
+    const paidAmount = Math.round(parseFloat(statusResponse.gross_amount));
+    const amountMatches = Number.isFinite(paidAmount) && paidAmount === order.amount;
+    if (newStatus === "PAID" && !amountMatches) {
+      console.error(
+        `[midtrans/notification] amount mismatch for ${orderCode}: expected ${order.amount}, got ${statusResponse.gross_amount}`,
+      );
+    }
+
     // The webhook only owns the PENDING_PAYMENT -> {PAID|FAILED|EXPIRED|CANCELLED}
     // transition. Once an order has left PENDING_PAYMENT — either because we already
     // recorded the payment, or because an admin has moved it into PROCESSING/COMPLETED —
     // a duplicate, delayed, or manually-resent Midtrans notification must never overwrite
     // `status` again (that would let a resent "settlement" event regress a COMPLETED
     // order back to PAID, or a stray "expire" downgrade it further).
-    const canUpdateStatus = order.status === "PENDING_PAYMENT";
+    const canUpdateStatus =
+      order.status === "PENDING_PAYMENT" && (newStatus !== "PAID" || amountMatches);
 
     await prisma.order.update({
       where: { id: order.id },
