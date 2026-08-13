@@ -44,7 +44,14 @@ export default async function GameDetailPage(props: {
   return (
     <Container className="py-8 sm:py-12">
       <div className="flex items-center gap-4 sm:gap-5">
-        <GameIcon label={game.badgeLabel} from={game.badgeFrom} to={game.badgeTo} size="xl" />
+        <GameIcon
+          label={game.badgeLabel}
+          from={game.badgeFrom}
+          to={game.badgeTo}
+          imageUrl={game.imageUrl}
+          alt={game.name}
+          size="xl"
+        />
         <div>
           <h1 className="text-2xl font-bold text-foreground sm:text-3xl">{game.name}</h1>
           <p className="mt-1 text-sm text-muted">{game.category}</p>

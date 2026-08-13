@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
         badgeLabel: data.badgeLabel,
         badgeFrom: data.badgeFrom,
         badgeTo: data.badgeTo,
+        imageUrl: data.imageUrl ?? null,
         requiresZoneId: data.requiresZoneId,
         playerIdLabel: data.playerIdLabel ?? undefined,
         zoneIdLabel: data.zoneIdLabel ?? undefined,

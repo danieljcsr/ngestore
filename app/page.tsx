@@ -27,6 +27,7 @@ export default async function Home() {
       badgeLabel: game.badgeLabel,
       badgeFrom: game.badgeFrom,
       badgeTo: game.badgeTo,
+      imageUrl: game.imageUrl,
       startingPrice: prices.length > 0 ? Math.min(...prices) : null,
     };
   });

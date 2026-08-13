@@ -46,6 +46,19 @@ persis `DATABASE_URL`. Kalau integrasi Vercel Storage memberi nama lain (mis.
 `POSTGRES_URL` atau `POSTGRES_PRISMA_URL`), tambahkan satu env var lagi bernama
 `DATABASE_URL` dengan nilai yang sama.
 
+### (Opsional) Aktifkan upload foto game
+
+Kalau ingin admin bisa upload foto game sendiri (JPG/PNG/WEBP) dari dashboard admin,
+alih-alih memakai ikon warna otomatis:
+
+1. Di project Vercel yang sama, buka tab **Storage > Create Database > Blob**.
+2. Pilih akses **Public**, beri nama, pilih environment (centang **Development** juga
+   kalau mau upload berfungsi saat `npm run dev` di laptop).
+3. Vercel otomatis menambahkan env var `BLOB_READ_WRITE_TOKEN` ke project.
+
+Ini opsional — tanpa langkah ini, tombol upload di admin akan menampilkan pesan
+"belum diaktifkan" dan situs tetap berjalan normal memakai ikon badge warna.
+
 ---
 
 ## 2. Siapkan akun Midtrans
@@ -104,6 +117,7 @@ Vercel deploy paling praktis lewat GitHub (deploy otomatis tiap ada perubahan ko
    | `ADMIN_EMAIL` | email login admin Anda |
    | `ADMIN_PASSWORD` | password kuat, minimal 10 karakter, jangan nilai contoh di `.env.example` |
    | `NEXT_PUBLIC_SITE_URL` | `https://ngestore.id` (boleh isi URL sementara `https://<nama-project>.vercel.app` dulu kalau domain belum tersambung, lalu update setelah bagian 6) |
+   | `BLOB_READ_WRITE_TOKEN` | opsional — kosongkan dulu kalau belum setup Blob Storage, bisa ditambah belakangan |
 
 5. Kalau belum bikin database Postgres di bagian 1: sekarang buka tab **Storage** di
    project Vercel ini, buat database Postgres baru, ikuti langkah otomatisnya (ini

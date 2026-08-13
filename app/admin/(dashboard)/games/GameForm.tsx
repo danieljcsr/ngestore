@@ -15,6 +15,7 @@ type GameData = {
   badgeLabel: string;
   badgeFrom: string;
   badgeTo: string;
+  imageUrl: string | null;
   requiresZoneId: boolean;
   playerIdLabel: string;
   zoneIdLabel: string;
@@ -48,6 +49,9 @@ export function GameForm({ mode, game }: Props) {
   const [badgeLabel, setBadgeLabel] = useState(game?.badgeLabel ?? "");
   const [badgeFrom, setBadgeFrom] = useState(game?.badgeFrom ?? "#8B5CF6");
   const [badgeTo, setBadgeTo] = useState(game?.badgeTo ?? "#6366F1");
+  const [imageUrl, setImageUrl] = useState<string | null>(game?.imageUrl ?? null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [requiresZoneId, setRequiresZoneId] = useState(game?.requiresZoneId ?? false);
   const [playerIdLabel, setPlayerIdLabel] = useState(game?.playerIdLabel ?? "User ID");
   const [zoneIdLabel, setZoneIdLabel] = useState(game?.zoneIdLabel ?? "Zone ID");
@@ -72,6 +76,34 @@ export function GameForm({ mode, game }: Props) {
     return messages[0];
   }
 
+  async function handleImageSelect(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = ""; // allow re-selecting the same file later
+    if (!file) return;
+
+    setUploading(true);
+    setUploadError(null);
+
+    try {
+      const body = new FormData();
+      body.append("file", file);
+
+      const response = await fetch("/api/admin/upload", { method: "POST", body });
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        setUploadError(result?.error ?? "Gagal mengunggah gambar.");
+        return;
+      }
+
+      setImageUrl(result.url as string);
+    } catch {
+      setUploadError("Tidak dapat menghubungi server. Periksa koneksi Anda.");
+    } finally {
+      setUploading(false);
+    }
+  }
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setSubmitting(true);
@@ -85,6 +117,7 @@ export function GameForm({ mode, game }: Props) {
       badgeLabel,
       badgeFrom,
       badgeTo,
+      imageUrl,
       requiresZoneId,
       // Send the field as typed (even if empty) rather than coercing "" to undefined:
       // undefined means "leave unchanged" to the API, so coercing would make clearing
@@ -193,11 +226,58 @@ export function GameForm({ mode, game }: Props) {
           )}
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-[auto_1fr_1fr]">
-          <div className="flex flex-col items-center gap-2">
-            <Label>Pratinjau</Label>
-            <GameIcon label={badgeLabel || "?"} from={badgeFrom || "#8B5CF6"} to={badgeTo || "#6366F1"} size="lg" />
+        <div>
+          <Label>Foto Game (opsional)</Label>
+          <div className="flex flex-wrap items-center gap-4 rounded-xl border border-dashed border-border p-4">
+            <GameIcon
+              label={badgeLabel || "?"}
+              from={badgeFrom || "#8B5CF6"}
+              to={badgeTo || "#6366F1"}
+              imageUrl={imageUrl}
+              size="lg"
+            />
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <label>
+                  <span
+                    className={`inline-flex cursor-pointer items-center rounded-xl border border-border bg-surface-2 px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-white/5 ${uploading ? "pointer-events-none opacity-50" : ""}`}
+                  >
+                    {uploading
+                      ? "Mengunggah..."
+                      : imageUrl
+                        ? "Ganti Foto"
+                        : "Upload Foto"}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleImageSelect}
+                    disabled={uploading}
+                    className="sr-only"
+                  />
+                </label>
+                {imageUrl && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setImageUrl(null)}
+                    disabled={uploading}
+                  >
+                    Hapus Foto
+                  </Button>
+                )}
+              </div>
+              <p className="text-xs text-muted">
+                JPG, PNG, atau WEBP, maksimal 2MB. Kalau tidak ada foto, badge warna di
+                bawah ini yang dipakai sebagai ikon.
+              </p>
+              {uploadError && <p className="text-xs text-danger">{uploadError}</p>}
+            </div>
           </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <Label htmlFor="badgeLabel">Label Badge</Label>
             <Input

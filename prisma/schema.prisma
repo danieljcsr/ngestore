@@ -28,6 +28,9 @@ model Game {
   badgeLabel      String
   badgeFrom       String
   badgeTo         String
+  // Optional uploaded cover image (JPG/PNG/WEBP via Vercel Blob). When null,
+  // the storefront falls back to the generated badgeLabel/badgeFrom/badgeTo icon.
+  imageUrl        String?
   requiresZoneId  Boolean  @default(false)
   playerIdLabel   String   @default("User ID")
   zoneIdLabel     String   @default("Zone ID")

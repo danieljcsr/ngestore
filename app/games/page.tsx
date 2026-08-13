@@ -59,6 +59,7 @@ export default async function GamesPage({
       badgeLabel: game.badgeLabel,
       badgeFrom: game.badgeFrom,
       badgeTo: game.badgeTo,
+      imageUrl: game.imageUrl,
       startingPrice: prices.length > 0 ? Math.min(...prices) : null,
     };
   });

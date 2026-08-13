@@ -41,7 +41,14 @@ export default async function AdminGamesPage() {
                 <tr key={game.id} className="border-b border-border/60 last:border-b-0">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <GameIcon label={game.badgeLabel} from={game.badgeFrom} to={game.badgeTo} size="sm" />
+                      <GameIcon
+                        label={game.badgeLabel}
+                        from={game.badgeFrom}
+                        to={game.badgeTo}
+                        imageUrl={game.imageUrl}
+                        alt={game.name}
+                        size="sm"
+                      />
                       <div>
                         <p className="font-semibold text-foreground">{game.name}</p>
                         <p className="text-xs text-muted">{game.slug}</p>

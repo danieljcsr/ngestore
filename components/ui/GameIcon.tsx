@@ -9,13 +9,31 @@ export function GameIcon({
   label,
   from,
   to,
+  imageUrl,
+  alt,
   size = "md",
 }: {
   label: string;
   from: string;
   to: string;
+  imageUrl?: string | null;
+  alt?: string;
   size?: keyof typeof SIZE_CLASSES;
 }) {
+  if (imageUrl) {
+    // Plain <img>, not next/image: this is an external, admin-uploaded file whose
+    // Vercel Blob hostname is per-store (random subdomain), so it can't be
+    // allowlisted in next.config.ts ahead of time.
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={imageUrl}
+        alt={alt ?? label}
+        className={`shrink-0 object-cover shadow-lg ${SIZE_CLASSES[size]}`}
+      />
+    );
+  }
+
   return (
     <div
       className={`flex shrink-0 items-center justify-center font-extrabold text-white shadow-lg ${SIZE_CLASSES[size]}`}

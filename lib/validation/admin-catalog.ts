@@ -11,6 +11,9 @@ export const gameCreateSchema = z.object({
   badgeLabel: z.string().min(1).max(6),
   badgeFrom: z.string().min(4).max(9),
   badgeTo: z.string().min(4).max(9),
+  // Absent key = leave unchanged (on update), null = clear back to the generated
+  // badge icon, string = the uploaded image URL.
+  imageUrl: z.string().url().max(500).nullable().optional(),
   requiresZoneId: z.boolean().optional().default(false),
   playerIdLabel: z.string().min(1).max(50).optional(),
   zoneIdLabel: z.string().min(1).max(50).optional(),

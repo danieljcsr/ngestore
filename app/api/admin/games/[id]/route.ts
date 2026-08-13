@@ -27,6 +27,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         ...(data.badgeLabel !== undefined ? { badgeLabel: data.badgeLabel } : {}),
         ...(data.badgeFrom !== undefined ? { badgeFrom: data.badgeFrom } : {}),
         ...(data.badgeTo !== undefined ? { badgeTo: data.badgeTo } : {}),
+        ...(data.imageUrl !== undefined ? { imageUrl: data.imageUrl } : {}),
         ...(data.requiresZoneId !== undefined ? { requiresZoneId: data.requiresZoneId } : {}),
         ...(data.playerIdLabel !== undefined ? { playerIdLabel: data.playerIdLabel } : {}),
         ...(data.zoneIdLabel !== undefined ? { zoneIdLabel: data.zoneIdLabel } : {}),
