@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <linearGradient id="gemGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B5CF6"/>
+      <stop offset="55%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#06B6D4"/>
+    </linearGradient>
+    <linearGradient id="gemShine" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="boltGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FDE047"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+  </defs>
+  <rect width="240" height="240" rx="48" fill="#0B0E1A"/>
+  <path d="M120 14 L206 63 L206 177 L120 226 L34 177 L34 63 Z"
+        fill="url(#gemGrad)" stroke="#C4B5FD" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M120 14 L206 63 L120 104 L34 63 Z" fill="url(#gemShine)"/>
+  <path d="M78 55 L104 55 L122 95 L113 95 L138 130 L138 55 L162 55 L162 185 L136 185 L118 145 L127 145 L102 110 L102 185 L78 185 Z"
+        fill="url(#boltGrad)" stroke="#FFFFFF" stroke-opacity="0.9" stroke-width="4" stroke-linejoin="round"/>
+</svg>

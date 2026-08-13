@@ -1,0 +1,109 @@
+// NgeStore data model.
+//
+// Local development uses SQLite (zero setup). Production deploys switch
+// `provider` to "postgresql" and point DATABASE_URL at a hosted Postgres
+// instance (see DEPLOY.md). No column type used below is Postgres- or
+// SQLite-specific, so this file does not need to change between the two —
+// only the datasource block does.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Game {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  category        String
+  badgeLabel      String
+  badgeFrom       String
+  badgeTo         String
+  requiresZoneId  Boolean  @default(false)
+  playerIdLabel   String   @default("User ID")
+  zoneIdLabel     String   @default("Zone ID")
+  instructions    String?
+  isActive        Boolean  @default(true)
+  isFeatured      Boolean  @default(false)
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  denominations Denomination[]
+  orders        Order[]
+
+  @@index([isActive, sortOrder])
+}
+
+model Denomination {
+  id        String   @id @default(cuid())
+  gameId    String
+  name      String
+  price     Int
+  note      String?
+  isActive  Boolean  @default(true)
+  isPopular Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  game   Game    @relation(fields: [gameId], references: [id], onDelete: Restrict)
+  orders Order[]
+
+  @@index([gameId, isActive, sortOrder])
+}
+
+// Order status values (kept as a plain string for SQLite/Postgres portability):
+//   PENDING_PAYMENT -> PAID -> PROCESSING -> COMPLETED
+//                   -> FAILED / EXPIRED / CANCELLED
+model Order {
+  id     String @id @default(cuid())
+  orderCode String @unique
+
+  gameId          String
+  gameName        String
+  denominationId  String
+  denominationName String
+  amount          Int
+
+  playerId String
+  zoneId   String?
+
+  contactName     String
+  contactWhatsapp String
+  contactEmail    String?
+
+  status String @default("PENDING_PAYMENT")
+
+  paymentMethod            String?
+  midtransToken            String?
+  midtransRedirectUrl      String?
+  midtransTransactionId    String?
+  midtransTransactionStatus String?
+
+  adminNote String?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  paidAt      DateTime?
+  fulfilledAt DateTime?
+
+  game         Game         @relation(fields: [gameId], references: [id], onDelete: Restrict)
+  denomination Denomination @relation(fields: [denominationId], references: [id], onDelete: Restrict)
+
+  @@index([status, createdAt])
+  @@index([orderCode])
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("admin")
+  createdAt    DateTime @default(now())
+}
