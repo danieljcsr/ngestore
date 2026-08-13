@@ -1,9 +1,9 @@
 // NgeStore data model.
 //
-// Local development uses SQLite (zero setup). Production deploys switch
-// `provider` below to "postgresql" and point DATABASE_URL at a hosted
-// Postgres instance — see DEPLOY.md step 1 for the exact change and why
-// it's a one-time, permanent switch rather than something to toggle back.
+// Runs on Postgres (Neon, provisioned via Vercel Storage) in production.
+// Local development can still point DATABASE_URL at a local SQLite file if
+// you switch `provider` back temporarily — but keep that local-only, don't
+// commit it, since production is Postgres now.
 //
 // No column type used below is Postgres- or SQLite-specific. Keep it that
 // way in application code too: avoid connector-only query features (e.g.
@@ -16,7 +16,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
