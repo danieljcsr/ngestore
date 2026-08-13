@@ -32,6 +32,7 @@ declare module "midtrans-client" {
 
   export interface NotificationStatusResponse {
     order_id: string;
+    transaction_id?: string;
     transaction_status: string;
     fraud_status?: string;
     payment_type?: string;

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { Menu, Search, X } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
@@ -15,6 +16,10 @@ const NAV_LINKS = [
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Admin has its own dashboard shell — don't show the storefront header there.
+  if (pathname?.startsWith("/admin")) return null;
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/80 bg-background/85 backdrop-blur">

@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ShieldCheck, Zap, Headset } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 
@@ -15,6 +18,9 @@ const FOOTER_LINKS = [
 ];
 
 export function Footer() {
+  const pathname = usePathname();
+  if (pathname?.startsWith("/admin")) return null;
+
   return (
     <footer className="mt-24 border-t border-border">
       <Container className="grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
