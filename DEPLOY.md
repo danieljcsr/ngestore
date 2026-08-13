@@ -158,18 +158,33 @@ sesuai `ADMIN_EMAIL`/`ADMIN_PASSWORD` yang Anda isi di bagian 4.
 
 ## 6. Sambungkan domain ngestore.id (DewaBiz)
 
-1. Di project Vercel, buka **Settings > Domains**, ketik `ngestore.id`, klik **Add**.
-2. Vercel akan menampilkan DNS record yang perlu ditambahkan (biasanya A record ke
-   `76.76.21.21` untuk `ngestore.id`, dan CNAME `www` ke `cname.vercel-dns.com` —
-   **pakai persis nilai yang ditampilkan Vercel saat itu**, karena bisa berbeda).
-3. Login ke panel DewaBiz Anda, buka pengaturan DNS/Zone Editor untuk domain
-   `ngestore.id`, tambahkan record persis seperti yang diminta Vercel.
-4. Tunggu propagasi DNS (biasanya menit-jam, maksimal ~48 jam). Vercel otomatis
-   menerbitkan SSL (https) begitu DNS terdeteksi benar — status di halaman Domains
-   akan berubah jadi centang hijau.
-5. Update env var `NEXT_PUBLIC_SITE_URL` di Vercel jadi `https://ngestore.id` (kalau
-   sebelumnya masih pakai URL `.vercel.app`), lalu buka tab **Deployments**, klik
-   deployment terakhir, **Redeploy** — env var baru baru berlaku setelah redeploy.
+**Penting:** kalau domain Anda sudah punya email aktif (`@ngestore.id` dengan
+webmail/cPanel di DewaBiz — record MX, SPF, DKIM mengarah ke IP hosting lama),
+**jangan ubah A record apex `ngestore.id`** ke alamat Vercel, itu akan mematikan
+email. Pakai `www.ngestore.id` sebagai alamat resmi situs, apex tetap untuk email.
+(Kalau domain Anda tidak punya email aktif, boleh langsung pakai apex `ngestore.id`
+seperti biasa — ikuti saran Vercel di langkah 2.)
+
+1. Tambahkan domain ke project:
+   ```bash
+   vercel domains add ngestore.id ngestore
+   vercel domains add www.ngestore.id ngestore
+   vercel domains inspect www.ngestore.id   # lihat A record yang diminta, biasanya 76.76.21.21
+   ```
+2. Di panel DNS DewaBiz (kalau domain sudah punya hosting/cPanel, ini ada di **DNS
+   Zone Editor** dalam produk hosting-nya, bukan halaman "DNS Management" di client
+   area domain), ubah record `www.ngestore.id` dari CNAME menjadi **A**, isi dengan
+   alamat yang diminta Vercel. **Jangan ubah record apex `ngestore.id`** kalau ada
+   email aktif di sana.
+3. Tunggu propagasi DNS (cek dengan `nslookup www.ngestore.id 8.8.8.8`) dan
+   penerbitan SSL Vercel (otomatis, beberapa menit setelah DNS benar — cek dengan
+   `curl -I https://www.ngestore.id`).
+4. Update env var `NEXT_PUBLIC_SITE_URL` jadi `https://www.ngestore.id`:
+   ```bash
+   vercel env rm NEXT_PUBLIC_SITE_URL production --yes
+   vercel env add NEXT_PUBLIC_SITE_URL production --value "https://www.ngestore.id" --yes
+   vercel --prod
+   ```
 
 ---
 
