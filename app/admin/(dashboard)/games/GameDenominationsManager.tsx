@@ -48,9 +48,11 @@ function DenominationRow({ denomination }: { denomination: Denomination }) {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          // Send `note` as typed (even ""): the API treats an omitted/undefined key as
+          // "leave unchanged" and only clears the note when it explicitly receives "".
           name,
           price: priceNumber,
-          note: note || undefined,
+          note,
           isActive,
           isPopular,
         }),

@@ -100,10 +100,12 @@ model Order {
 }
 
 model AdminUser {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  name         String
-  role         String   @default("admin")
-  createdAt    DateTime @default(now())
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  passwordHash       String
+  name               String
+  role               String    @default("admin")
+  failedLoginAttempts Int      @default(0)
+  lockedUntil        DateTime?
+  createdAt          DateTime  @default(now())
 }

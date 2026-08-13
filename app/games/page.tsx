@@ -31,7 +31,6 @@ export default async function GamesPage({
     where: {
       isActive: true,
       ...(category ? { category } : {}),
-      ...(query ? { name: { contains: query } } : {}),
     },
     orderBy: { sortOrder: "asc" },
     include: {
@@ -42,7 +41,16 @@ export default async function GamesPage({
     },
   });
 
-  const gameCards = games.map((game) => {
+  // Filtered in application code rather than via Prisma's `contains` so search is
+  // reliably case-insensitive on every database provider — Postgres (production)
+  // requires an explicit `mode: "insensitive"` that SQLite (local dev) doesn't
+  // support, so a DB-level filter would silently behave differently in each place.
+  const normalizedQuery = query.toLowerCase();
+  const matchedGames = normalizedQuery
+    ? games.filter((game) => game.name.toLowerCase().includes(normalizedQuery))
+    : games;
+
+  const gameCards = matchedGames.map((game) => {
     const prices = game.denominations.map((d) => d.price);
     return {
       slug: game.slug,

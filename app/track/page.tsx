@@ -25,7 +25,7 @@ export default function TrackPage() {
         <p className="mt-2 text-sm text-muted">
           Masukkan kode pesanan kamu untuk melihat status top up. Kode pesanan dikirim
           setelah checkout, formatnya seperti{" "}
-          <span className="font-mono text-foreground/90">NGS-20260813-7F3K9A</span>.
+          <span className="font-mono text-foreground/90">NGS-20260813-7F3A9C21E0</span>.
         </p>
 
         <Card className="mt-6 p-6">
@@ -35,7 +35,7 @@ export default function TrackPage() {
               <Input
                 id="order-code"
                 name="orderCode"
-                placeholder="NGS-20260813-7F3K9A"
+                placeholder="NGS-20260813-7F3A9C21E0"
                 value={code}
                 onChange={(event) => setCode(event.target.value)}
                 autoCapitalize="characters"

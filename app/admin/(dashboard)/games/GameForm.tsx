@@ -86,9 +86,15 @@ export function GameForm({ mode, game }: Props) {
       badgeFrom,
       badgeTo,
       requiresZoneId,
-      playerIdLabel: playerIdLabel || undefined,
-      zoneIdLabel: zoneIdLabel || undefined,
-      instructions: instructions || undefined,
+      // Send the field as typed (even if empty) rather than coercing "" to undefined:
+      // undefined means "leave unchanged" to the API, so coercing would make clearing
+      // a field in the edit form silently no-op instead of either clearing it
+      // (instructions, which is nullable) or surfacing a validation error (the two
+      // labels, which are required — the API will reject an empty value with a
+      // proper inline field error instead of quietly keeping the stale one).
+      playerIdLabel,
+      zoneIdLabel,
+      instructions,
       isFeatured,
       isActive,
     };

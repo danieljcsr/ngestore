@@ -33,16 +33,26 @@ export async function POST(request: Request) {
       statusResponse.fraud_status,
     );
 
+    // The webhook only owns the PENDING_PAYMENT -> {PAID|FAILED|EXPIRED|CANCELLED}
+    // transition. Once an order has left PENDING_PAYMENT — either because we already
+    // recorded the payment, or because an admin has moved it into PROCESSING/COMPLETED —
+    // a duplicate, delayed, or manually-resent Midtrans notification must never overwrite
+    // `status` again (that would let a resent "settlement" event regress a COMPLETED
+    // order back to PAID, or a stray "expire" downgrade it further).
+    const canUpdateStatus = order.status === "PENDING_PAYMENT";
+
     await prisma.order.update({
       where: { id: order.id },
       data: {
-        status: newStatus,
+        ...(canUpdateStatus ? { status: newStatus } : {}),
         ...(statusResponse.transaction_id
           ? { midtransTransactionId: statusResponse.transaction_id }
           : {}),
         midtransTransactionStatus: statusResponse.transaction_status,
         ...(statusResponse.payment_type ? { paymentMethod: statusResponse.payment_type } : {}),
-        ...(newStatus === "PAID" && !order.paidAt ? { paidAt: new Date() } : {}),
+        ...(canUpdateStatus && newStatus === "PAID" && !order.paidAt
+          ? { paidAt: new Date() }
+          : {}),
       },
     });
   } catch (error) {

@@ -226,13 +226,28 @@ const GAMES: SeedGame[] = [
 ];
 
 async function seedAdmin() {
-  const email = process.env.ADMIN_EMAIL ?? "admin@ngestore.id";
-  const password = process.env.ADMIN_PASSWORD ?? "change-this-password";
+  const email = process.env.ADMIN_EMAIL;
+  const password = process.env.ADMIN_PASSWORD;
+
+  if (!email || !password) {
+    throw new Error(
+      "ADMIN_EMAIL dan ADMIN_PASSWORD wajib diisi di .env sebelum menjalankan seed — " +
+        "tidak ada default yang dipakai diam-diam, supaya tidak ada akun admin dengan " +
+        "kredensial yang bisa ditebak. Lihat .env.example.",
+    );
+  }
+  if (password.length < 10) {
+    throw new Error("ADMIN_PASSWORD terlalu pendek — gunakan minimal 10 karakter.");
+  }
+  if (password === "change-this-password") {
+    throw new Error("ADMIN_PASSWORD masih memakai nilai contoh — ganti dengan password asli.");
+  }
+
   const passwordHash = await hashPassword(password);
 
   await prisma.adminUser.upsert({
     where: { email },
-    update: { passwordHash },
+    update: { passwordHash, failedLoginAttempts: 0, lockedUntil: null },
     create: { email, passwordHash, name: "Admin NgeStore", role: "admin" },
   });
 
