@@ -1,10 +1,15 @@
 // NgeStore data model.
 //
 // Local development uses SQLite (zero setup). Production deploys switch
-// `provider` to "postgresql" and point DATABASE_URL at a hosted Postgres
-// instance (see DEPLOY.md). No column type used below is Postgres- or
-// SQLite-specific, so this file does not need to change between the two —
-// only the datasource block does.
+// `provider` below to "postgresql" and point DATABASE_URL at a hosted
+// Postgres instance — see DEPLOY.md step 1 for the exact change and why
+// it's a one-time, permanent switch rather than something to toggle back.
+//
+// No column type used below is Postgres- or SQLite-specific. Keep it that
+// way in application code too: avoid connector-only query features (e.g.
+// Prisma's `mode: "insensitive"` string filter only works on Postgres/
+// MongoDB) — filter/sort in JS instead when in doubt, so dev and prod stay
+// behaviorally identical. app/games/page.tsx does this for search.
 
 generator client {
   provider = "prisma-client-js"

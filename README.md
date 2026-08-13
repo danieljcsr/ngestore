@@ -1,36 +1,32 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NgeStore
 
-## Getting Started
+Website top up game — top up Diamond, UC, dan voucher game populer. Dibangun dengan
+Next.js 16 (App Router), TypeScript, Tailwind CSS, Prisma, dan Midtrans Snap untuk
+pembayaran.
 
-First, run the development server:
+## Menjalankan secara lokal
 
 ```bash
+npm install
+cp .env.example .env   # lalu isi nilai-nilainya, lihat penjelasan di dalam file
+npx prisma db push     # buat/sinkronkan database SQLite lokal
+npx prisma db seed     # isi katalog game contoh + akun admin
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Buka [http://localhost:3000](http://localhost:3000). Dashboard admin ada di `/admin/login`
+(kredensial dari `ADMIN_EMAIL`/`ADMIN_PASSWORD` di `.env`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Struktur penting
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `app/` — halaman & API route (App Router). `app/admin/(dashboard)` dan
+  `app/admin/(auth)` adalah route group untuk area admin (dilindungi oleh `proxy.ts`
+  di root, penerus `middleware.ts` di Next.js 16).
+- `prisma/schema.prisma` — model data (Game, Denomination, Order, AdminUser).
+- `lib/` — helper bersama: koneksi Prisma, sesi admin, wrapper Midtrans, validasi zod.
+- `components/ui`, `components/layout`, `components/home` — komponen UI.
 
-## Learn More
+## Deploy ke production
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Lihat [DEPLOY.md](./DEPLOY.md) untuk panduan lengkap deploy ke Vercel dengan domain
+ngestore.id, database Postgres, dan pembayaran Midtrans.
