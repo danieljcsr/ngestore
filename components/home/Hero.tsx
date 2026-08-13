@@ -29,13 +29,13 @@ export function Hero() {
           alt=""
           fill
           priority
-          className="object-cover object-center opacity-45"
+          className="object-cover object-center opacity-70"
           sizes="100vw"
         />
         {/* Fade the banner into the page background so it reads as atmosphere,
             not a hard-edged photo, and keeps text readable on top of it. */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/80 to-background" />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-transparent to-background" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/55 to-background" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-transparent to-background/90" />
       </div>
 
       <div
@@ -52,10 +52,6 @@ export function Hero() {
       />
 
       <div className="relative flex flex-col items-center gap-8 py-16 text-center sm:py-24">
-        <span className="font-display inline-flex items-center gap-2 rounded-full border border-brand-indigo/40 bg-brand-indigo/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-brand-cyan">
-          Portal Top Up Game
-        </span>
-
         <h1 className="font-display text-glow-brand max-w-3xl text-balance text-4xl font-bold uppercase leading-tight tracking-wide text-foreground sm:text-6xl sm:leading-tight">
           Top Up Game{" "}
           <span className="text-gradient-brand">Cepat, Murah &amp; Aman</span>{" "}
