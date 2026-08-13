@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { ShieldCheck, Zap, Users } from "lucide-react";
 import { GameSearchBar } from "@/components/home/GameSearchBar";
 
@@ -22,6 +23,21 @@ const TRUST_INDICATORS = [
 export function Hero() {
   return (
     <section className="relative overflow-hidden">
+      <div className="absolute inset-0" aria-hidden="true">
+        <Image
+          src="/hero/banner.png"
+          alt=""
+          fill
+          priority
+          className="object-cover object-center opacity-45"
+          sizes="100vw"
+        />
+        {/* Fade the banner into the page background so it reads as atmosphere,
+            not a hard-edged photo, and keeps text readable on top of it. */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/80 to-background" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-transparent to-background" />
+      </div>
+
       <div
         aria-hidden="true"
         className="pointer-events-none absolute -top-32 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-brand-indigo/30 blur-3xl sm:h-[28rem] sm:w-[28rem]"
@@ -36,7 +52,11 @@ export function Hero() {
       />
 
       <div className="relative flex flex-col items-center gap-8 py-16 text-center sm:py-24">
-        <h1 className="max-w-3xl text-balance text-3xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl sm:leading-tight">
+        <span className="font-display inline-flex items-center gap-2 rounded-full border border-brand-indigo/40 bg-brand-indigo/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-brand-cyan">
+          Portal Top Up Game
+        </span>
+
+        <h1 className="font-display text-glow-brand max-w-3xl text-balance text-4xl font-bold uppercase leading-tight tracking-wide text-foreground sm:text-6xl sm:leading-tight">
           Top Up Game{" "}
           <span className="text-gradient-brand">Cepat, Murah &amp; Aman</span>{" "}
           Cuma di NgeStore
@@ -54,13 +74,15 @@ export function Hero() {
           {TRUST_INDICATORS.map(({ icon: Icon, label, description }) => (
             <div
               key={label}
-              className="card-surface flex items-center gap-3 rounded-2xl p-4 text-left sm:flex-col sm:items-start sm:gap-2"
+              className="card-surface group flex items-center gap-3 rounded-2xl p-4 text-left backdrop-blur-sm transition hover:border-brand-cyan/50 sm:flex-col sm:items-start sm:gap-2"
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-brand text-white">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-brand text-white shadow-lg shadow-brand-indigo/30 transition group-hover:shadow-brand-cyan/40">
                 <Icon className="h-5 w-5" aria-hidden="true" />
               </span>
               <div>
-                <dt className="text-sm font-semibold text-foreground">{label}</dt>
+                <dt className="font-display text-sm font-semibold tracking-wide text-foreground">
+                  {label}
+                </dt>
                 <dd className="text-xs text-muted">{description}</dd>
               </div>
             </div>

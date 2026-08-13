@@ -48,7 +48,7 @@ export default async function Home() {
           <div>
             <h2
               id="popular-games-heading"
-              className="text-2xl font-bold text-foreground sm:text-3xl"
+              className="font-display text-3xl font-bold uppercase tracking-wide text-foreground sm:text-4xl"
             >
               Game Populer
             </h2>
@@ -78,7 +78,7 @@ export default async function Home() {
       <HowItWorks />
 
       <section className="my-8 rounded-3xl bg-gradient-brand p-8 text-center sm:my-12 sm:p-12">
-        <h2 className="text-2xl font-bold text-white sm:text-3xl">
+        <h2 className="font-display text-3xl font-bold uppercase tracking-wide text-white sm:text-4xl">
           Nggak nemu game kamu di atas?
         </h2>
         <p className="mx-auto mt-2 max-w-md text-sm text-white/85 sm:text-base">

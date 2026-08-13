@@ -80,7 +80,7 @@ export default async function GamesPage({
   return (
     <Container className="py-10 sm:py-14">
       <div className="mb-8 text-center sm:mb-10">
-        <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
+        <h1 className="font-display text-4xl font-bold uppercase tracking-wide text-foreground sm:text-5xl">
           Semua <span className="text-gradient-brand">Game</span>
         </h1>
         <p className="mt-2 text-sm text-muted sm:text-base">
