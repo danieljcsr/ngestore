@@ -99,6 +99,17 @@ export async function dispatchOrderToProvider(orderId: string): Promise<Provider
     return { outcome: "not_configured" };
   }
 
+  // Never ship product for an order that isn't actually paid. The automatic
+  // caller only ever reaches here right after confirming PAID, and the admin
+  // UI only shows "Kirim ke Provider" for PAID/PROCESSING — but this function
+  // is the one place that truly guarantees it, regardless of caller.
+  if (order.status !== "PAID" && order.status !== "PROCESSING") {
+    return {
+      outcome: "not_configured",
+      message: "Pesanan ini belum berstatus Sudah Dibayar / Sedang Diproses.",
+    };
+  }
+
   const denomination = await prisma.denomination.findUnique({
     where: { id: order.denominationId },
   });
