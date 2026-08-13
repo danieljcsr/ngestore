@@ -9,9 +9,21 @@ const ALLOWED_TYPES: Record<string, string> = {
   "image/webp": "webp",
 };
 
+// @vercel/blob resolves credentials from either a static BLOB_READ_WRITE_TOKEN,
+// or (when the store is connected via OIDC instead) a VERCEL_OIDC_TOKEN paired
+// with BLOB_STORE_ID — see https://vercel.com/docs/vercel-blob/using-blob-sdk.
+// Checking only one of these would report "not configured" even when the other
+// path is fully working.
+function hasBlobCredentials(): boolean {
+  return Boolean(
+    process.env.BLOB_READ_WRITE_TOKEN ||
+      (process.env.VERCEL_OIDC_TOKEN && process.env.BLOB_STORE_ID),
+  );
+}
+
 // Protected by proxy.ts (matches /api/admin/:path*) — only a logged-in admin reaches here.
 export async function POST(request: NextRequest) {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+  if (!hasBlobCredentials()) {
     return NextResponse.json(
       {
         error:
