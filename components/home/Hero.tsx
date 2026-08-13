@@ -63,14 +63,14 @@ export function Hero() {
         </p>
 
         <div className="w-full max-w-xl">
-          <GameSearchBar />
+          <GameSearchBar className="border-white/15 bg-white/5 backdrop-blur-md" />
         </div>
 
         <dl className="mt-4 grid w-full max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3">
           {TRUST_INDICATORS.map(({ icon: Icon, label, description }) => (
             <div
               key={label}
-              className="card-surface group flex items-center gap-3 rounded-2xl p-4 text-left backdrop-blur-sm transition hover:border-brand-cyan/50 sm:flex-col sm:items-start sm:gap-2"
+              className="group flex items-center gap-3 rounded-2xl border border-white/15 bg-white/5 p-4 text-left backdrop-blur-md transition hover:border-brand-cyan/50 hover:bg-white/10 sm:flex-col sm:items-start sm:gap-2"
             >
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-brand text-white shadow-lg shadow-brand-indigo/30 transition group-hover:shadow-brand-cyan/40">
                 <Icon className="h-5 w-5" aria-hidden="true" />

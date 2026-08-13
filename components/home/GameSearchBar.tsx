@@ -1,4 +1,5 @@
 import { Search } from "lucide-react";
+import { cn } from "@/lib/cn";
 
 export function GameSearchBar({
   defaultValue,
@@ -12,7 +13,10 @@ export function GameSearchBar({
       action="/games"
       method="get"
       role="search"
-      className={`flex w-full items-center gap-2 rounded-2xl border border-border bg-surface-2/80 p-2 shadow-lg shadow-black/20 backdrop-blur ${className ?? ""}`}
+      className={cn(
+        "flex w-full items-center gap-2 rounded-2xl border border-border bg-surface-2/80 p-2 shadow-lg shadow-black/20 backdrop-blur",
+        className,
+      )}
     >
       <label htmlFor="game-search-q" className="sr-only">
         Cari game
