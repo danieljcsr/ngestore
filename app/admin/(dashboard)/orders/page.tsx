@@ -78,7 +78,7 @@ export default async function AdminOrdersPage({
             Tidak ada pesanan pada kategori ini.
           </div>
         ) : (
-          <table className="w-full min-w-[960px] text-left text-sm">
+          <table className="w-full min-w-[1080px] text-left text-sm">
             <thead>
               <tr className="border-b border-border text-xs uppercase tracking-wide text-muted">
                 <th className="px-4 py-3 font-medium">Kode</th>
@@ -87,6 +87,7 @@ export default async function AdminOrdersPage({
                 <th className="px-4 py-3 font-medium">ID Pemain</th>
                 <th className="px-4 py-3 font-medium">Kontak</th>
                 <th className="px-4 py-3 font-medium">Total</th>
+                <th className="px-4 py-3 font-medium">Provider</th>
                 <th className="px-4 py-3 font-medium">Waktu</th>
                 <th className="px-4 py-3 font-medium">Aksi</th>
               </tr>
@@ -112,6 +113,20 @@ export default async function AdminOrdersPage({
                   </td>
                   <td className="px-4 py-3 font-semibold text-foreground">
                     {formatRupiah(order.amount)}
+                  </td>
+                  <td className="px-4 py-3 text-xs">
+                    {order.providerStatus ? (
+                      <>
+                        <p className="font-medium text-foreground">{order.providerStatus}</p>
+                        {order.providerMessage && (
+                          <p className="mt-0.5 max-w-[180px] text-muted">
+                            {order.providerMessage}
+                          </p>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-muted">Belum dikirim</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-xs text-muted">{formatDateTime(order.createdAt)}</td>
                   <td className="px-4 py-3">

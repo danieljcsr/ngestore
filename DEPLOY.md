@@ -217,6 +217,31 @@ Setelah Midtrans mengaktifkan akun production Anda:
 
 ---
 
+## 9. Hubungkan provider top up otomatis (opsional)
+
+Tanpa langkah ini, semua pesanan tetap diproses **manual** lewat halaman Pesanan —
+tidak ada yang wajib di sini. Kalau Anda sudah punya akun provider H2H (Digiflazz
+atau sejenisnya) dengan saldo deposit:
+
+1. Login admin, buka **Pengaturan Provider** di sidebar.
+2. Isi **URL API**, **Username**, **API Key** dari dashboard provider Anda.
+3. Klik **Buat Token** untuk token callback, **Simpan Pengaturan**.
+4. Salin **URL callback** yang muncul, tempel di dashboard provider Anda (biasanya
+   kolom "Callback URL"/"Webhook URL").
+5. Centang **Aktifkan pengiriman otomatis ke provider**, simpan lagi.
+6. Buka tiap game di **Katalog Game > Kelola**, isi **Kode Produk Provider (SKU)**
+   di tiap nominal yang ingin dikirim otomatis (kosongkan yang belum dipetakan —
+   nominal itu tetap diproses manual seperti biasa).
+7. Coba satu transaksi nominal kecil, cek kolom **Provider** di halaman Pesanan
+   untuk melihat status dari provider.
+
+Bentuk request/respons di `lib/provider.ts` mengikuti pola Digiflazz (yang paling
+umum dipakai/ditiru provider H2H di Indonesia). Kalau provider Anda memakai format
+berbeda, itu satu-satunya file yang perlu disesuaikan — bagian lain sistem (urutan
+status pesanan, dashboard, dll) tidak perlu diubah.
+
+---
+
 ## Checklist keamanan sebelum go-live
 
 - [ ] `ADMIN_PASSWORD` bukan nilai contoh, minimal 10 karakter, unik.

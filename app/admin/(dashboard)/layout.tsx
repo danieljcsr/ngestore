@@ -18,6 +18,7 @@ export default async function AdminDashboardLayout({
   const navItems = [
     { href: "/admin/orders", label: "Pesanan" },
     { href: "/admin/games", label: "Katalog Game" },
+    { href: "/admin/settings", label: "Pengaturan Provider" },
   ];
 
   return (

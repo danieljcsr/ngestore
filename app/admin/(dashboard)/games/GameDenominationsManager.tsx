@@ -15,6 +15,7 @@ type Denomination = {
   isActive: boolean;
   isPopular: boolean;
   sortOrder: number;
+  providerSku: string | null;
 };
 
 function DenominationRow({ denomination }: { denomination: Denomination }) {
@@ -22,6 +23,7 @@ function DenominationRow({ denomination }: { denomination: Denomination }) {
   const [name, setName] = useState(denomination.name);
   const [price, setPrice] = useState(String(denomination.price));
   const [note, setNote] = useState(denomination.note ?? "");
+  const [providerSku, setProviderSku] = useState(denomination.providerSku ?? "");
   const [isActive, setIsActive] = useState(denomination.isActive);
   const [isPopular, setIsPopular] = useState(denomination.isPopular);
   const [saving, setSaving] = useState(false);
@@ -48,11 +50,13 @@ function DenominationRow({ denomination }: { denomination: Denomination }) {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          // Send `note` as typed (even ""): the API treats an omitted/undefined key as
-          // "leave unchanged" and only clears the note when it explicitly receives "".
+          // Send fields as typed (even ""): the API treats an omitted/undefined key
+          // as "leave unchanged" and only clears a field when it explicitly receives
+          // "" (or null for providerSku).
           name,
           price: priceNumber,
           note,
+          providerSku: providerSku.trim() || null,
           isActive,
           isPopular,
         }),
@@ -75,52 +79,56 @@ function DenominationRow({ denomination }: { denomination: Denomination }) {
   }
 
   return (
-    <div className="grid gap-3 rounded-xl border border-border bg-surface-2 p-4 sm:grid-cols-[1.2fr_1fr_1.2fr_auto_auto_auto]">
-      <div>
-        <Label className="text-xs">Nama</Label>
-        <Input value={name} onChange={(e) => setName(e.target.value)} />
+    <div className="space-y-3 rounded-xl border border-border bg-surface-2 p-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div>
+          <Label className="text-xs">Nama</Label>
+          <Input value={name} onChange={(e) => setName(e.target.value)} />
+        </div>
+        <div>
+          <Label className="text-xs">Harga</Label>
+          <Input type="number" min={1} value={price} onChange={(e) => setPrice(e.target.value)} />
+        </div>
+        <div>
+          <Label className="text-xs">Catatan</Label>
+          <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Opsional" />
+        </div>
+        <div>
+          <Label className="text-xs">Kode Produk Provider (SKU)</Label>
+          <Input
+            value={providerSku}
+            onChange={(e) => setProviderSku(e.target.value)}
+            placeholder="Opsional, misal: ML86"
+            className="font-mono"
+          />
+        </div>
       </div>
-      <div>
-        <Label className="text-xs">Harga</Label>
-        <Input type="number" min={1} value={price} onChange={(e) => setPrice(e.target.value)} />
-      </div>
-      <div>
-        <Label className="text-xs">Catatan</Label>
-        <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Opsional" />
-      </div>
-      <div className="flex items-end gap-2 pb-2.5">
-        <input
-          id={"active-" + denomination.id}
-          type="checkbox"
-          checked={isActive}
-          onChange={(e) => setIsActive(e.target.checked)}
-          className="h-4 w-4 rounded border-border bg-surface-2 accent-brand-indigo"
-        />
-        <Label htmlFor={"active-" + denomination.id} className="mb-0 text-xs">
+
+      <div className="flex flex-wrap items-center gap-4">
+        <label className="flex items-center gap-2 text-xs">
+          <input
+            type="checkbox"
+            checked={isActive}
+            onChange={(e) => setIsActive(e.target.checked)}
+            className="h-4 w-4 rounded border-border bg-surface-2 accent-brand-indigo"
+          />
           Aktif
-        </Label>
-      </div>
-      <div className="flex items-end gap-2 pb-2.5">
-        <input
-          id={"popular-" + denomination.id}
-          type="checkbox"
-          checked={isPopular}
-          onChange={(e) => setIsPopular(e.target.checked)}
-          className="h-4 w-4 rounded border-border bg-surface-2 accent-brand-indigo"
-        />
-        <Label htmlFor={"popular-" + denomination.id} className="mb-0 text-xs">
+        </label>
+        <label className="flex items-center gap-2 text-xs">
+          <input
+            type="checkbox"
+            checked={isPopular}
+            onChange={(e) => setIsPopular(e.target.checked)}
+            className="h-4 w-4 rounded border-border bg-surface-2 accent-brand-indigo"
+          />
           Populer
-        </Label>
-      </div>
-      <div className="flex items-end pb-0.5">
+        </label>
         <Button type="button" size="sm" variant="secondary" onClick={handleSave} disabled={saving}>
           {saving ? "Menyimpan..." : "Simpan"}
         </Button>
+        <p className="text-xs text-muted">Harga saat ini: {formatRupiah(denomination.price)}</p>
       </div>
-      {error && <p className="text-xs text-danger sm:col-span-6">{error}</p>}
-      <p className="text-xs text-muted sm:col-span-6">
-        Harga saat ini: {formatRupiah(denomination.price)}
-      </p>
+      {error && <p className="text-xs text-danger">{error}</p>}
     </div>
   );
 }
@@ -136,6 +144,7 @@ export function GameDenominationsManager({
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [note, setNote] = useState("");
+  const [providerSku, setProviderSku] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -160,7 +169,12 @@ export function GameDenominationsManager({
       const response = await fetch("/api/admin/games/" + gameId + "/denominations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, price: priceNumber, note: note || undefined }),
+        body: JSON.stringify({
+          name,
+          price: priceNumber,
+          note: note || undefined,
+          providerSku: providerSku.trim() || undefined,
+        }),
       });
 
       const result = await response.json().catch(() => null);
@@ -174,6 +188,7 @@ export function GameDenominationsManager({
       setName("");
       setPrice("");
       setNote("");
+      setProviderSku("");
       router.refresh();
       setSubmitting(false);
     } catch {
@@ -187,7 +202,9 @@ export function GameDenominationsManager({
       <div>
         <h2 className="text-lg font-bold text-foreground">Nominal Top Up</h2>
         <p className="mt-1 text-sm text-muted">
-          Kelola pilihan nominal yang tersedia untuk game ini.
+          Kelola pilihan nominal yang tersedia untuk game ini. Isi &ldquo;Kode Produk
+          Provider&rdquo; supaya nominal ini bisa dikirim otomatis ke provider top up
+          (lihat Pengaturan Provider).
         </p>
       </div>
 
@@ -204,7 +221,7 @@ export function GameDenominationsManager({
 
       <form
         onSubmit={handleAdd}
-        className="grid gap-3 rounded-xl border border-dashed border-border p-4 sm:grid-cols-[1.2fr_1fr_1.2fr_auto]"
+        className="grid gap-3 rounded-xl border border-dashed border-border p-4 sm:grid-cols-2 lg:grid-cols-5"
       >
         <div>
           <Label className="text-xs">Nama</Label>
@@ -224,12 +241,21 @@ export function GameDenominationsManager({
           <Label className="text-xs">Catatan</Label>
           <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Opsional" />
         </div>
+        <div>
+          <Label className="text-xs">Kode Produk (SKU)</Label>
+          <Input
+            value={providerSku}
+            onChange={(e) => setProviderSku(e.target.value)}
+            placeholder="Opsional"
+            className="font-mono"
+          />
+        </div>
         <div className="flex items-end">
-          <Button type="submit" size="sm" disabled={submitting}>
+          <Button type="submit" size="sm" disabled={submitting} className="w-full">
             {submitting ? "Menambahkan..." : "Tambah Nominal"}
           </Button>
         </div>
-        {error && <p className="text-xs text-danger sm:col-span-4">{error}</p>}
+        {error && <p className="text-xs text-danger sm:col-span-2 lg:col-span-5">{error}</p>}
       </form>
     </Card>
   );

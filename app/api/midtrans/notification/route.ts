@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCoreApiClient, mapMidtransStatus } from "@/lib/midtrans";
+import { dispatchOrderToProvider } from "@/lib/provider";
 
 export async function POST(request: Request) {
   let body: unknown;
@@ -69,6 +70,14 @@ export async function POST(request: Request) {
           : {}),
       },
     });
+
+    // Hand this off to run after the response is sent — Midtrans expects a
+    // fast 200, and dispatchOrderToProvider() can take a few seconds (or be a
+    // no-op if no supplier is configured yet). after() keeps the serverless
+    // function alive long enough to finish it without delaying the webhook ack.
+    if (canUpdateStatus && newStatus === "PAID") {
+      after(() => dispatchOrderToProvider(order.id));
+    }
   } catch (error) {
     console.error("[midtrans/notification] failed to update order:", error);
   }

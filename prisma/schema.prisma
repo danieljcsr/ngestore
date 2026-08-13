@@ -56,6 +56,10 @@ model Denomination {
   isActive  Boolean  @default(true)
   isPopular Boolean  @default(false)
   sortOrder Int      @default(0)
+  // Maps this nominal to the supplier/provider's own product code (SKU), e.g.
+  // Digiflazz's buyer_sku_code. Null = not connected to a supplier yet, so
+  // orders for it are fulfilled manually like before.
+  providerSku String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -95,6 +99,14 @@ model Order {
 
   adminNote String?
 
+  // Supplier/provider fulfillment tracking (see ProviderSetting). All null
+  // until an attempt is made to send this order to the configured supplier.
+  providerRefId         String?   @unique
+  providerTrxId         String?
+  providerStatus        String?
+  providerMessage       String?
+  fulfillmentSentAt     DateTime?
+
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   paidAt      DateTime?
@@ -105,6 +117,33 @@ model Order {
 
   @@index([status, createdAt])
   @@index([orderCode])
+}
+
+// Singleton row (always the first/only record) holding the connection details
+// for an automatic top-up supplier (e.g. Digiflazz or similar H2H provider).
+// Kept in the database — not env vars — so the store owner can plug in their
+// own provider from the admin dashboard without a redeploy. Credentials are
+// stored as plain text here deliberately (same trust boundary as env vars:
+// only reachable by an authenticated admin, via the same protected API
+// surface as the rest of /api/admin/*).
+model ProviderSetting {
+  id           String  @id @default(cuid())
+  isEnabled    Boolean @default(false)
+  providerName String  @default("Provider Top Up")
+  apiBaseUrl   String?
+  apiUsername  String?
+  apiKey       String?
+  // Most Indonesian H2H top-up providers (Digiflazz and many compatible
+  // clones) sign requests with md5(username + apiKey + ref_id). Turn this
+  // off for a provider that authenticates a different way (e.g. a bearer
+  // token sent as the apiKey value).
+  useMd5Signature Boolean @default(true)
+  // Shared secret the provider's callback URL must include (as ?token=... or
+  // an X-Callback-Token header) before an inbound status update is trusted.
+  callbackToken String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model AdminUser {

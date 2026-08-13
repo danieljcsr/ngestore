@@ -26,6 +26,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         ...(data.note !== undefined ? { note: data.note || null } : {}),
         ...(data.isActive !== undefined ? { isActive: data.isActive } : {}),
         ...(data.isPopular !== undefined ? { isPopular: data.isPopular } : {}),
+        ...(data.providerSku !== undefined ? { providerSku: data.providerSku } : {}),
       },
     });
 

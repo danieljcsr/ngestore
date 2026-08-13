@@ -31,6 +31,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         price: data.price,
         note: data.note ?? null,
         isPopular: data.isPopular,
+        providerSku: data.providerSku ?? null,
         isActive: true,
         sortOrder: currentCount,
       },

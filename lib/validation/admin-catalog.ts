@@ -55,6 +55,7 @@ export const denominationCreateSchema = z.object({
   price: z.coerce.number().int().positive(),
   note: z.string().max(200).optional(),
   isPopular: z.boolean().optional().default(false),
+  providerSku: z.string().max(100).nullable().optional(),
 });
 
 export const denominationUpdateSchema = z.object({
@@ -63,4 +64,5 @@ export const denominationUpdateSchema = z.object({
   note: z.string().max(200).optional(),
   isActive: z.boolean().optional(),
   isPopular: z.boolean().optional(),
+  providerSku: z.string().max(100).nullable().optional(),
 });

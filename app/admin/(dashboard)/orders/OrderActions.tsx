@@ -25,12 +25,34 @@ type OrderActionsProps = {
   };
 };
 
+const DISPATCHABLE_STATUSES: OrderStatus[] = ["PAID", "PROCESSING"];
+
 export function OrderActions({ order }: OrderActionsProps) {
   const router = useRouter();
   const [status, setStatus] = useState<OrderStatus>(order.status);
   const [adminNote, setAdminNote] = useState(order.adminNote ?? "");
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDispatching, setIsDispatching] = useState(false);
+  const [dispatchResult, setDispatchResult] = useState<string | null>(null);
+
+  async function handleDispatch() {
+    setIsDispatching(true);
+    setDispatchResult(null);
+
+    try {
+      const res = await fetch(`/api/admin/orders/${order.id}/dispatch`, { method: "POST" });
+      const data = await res.json().catch(() => null);
+      setDispatchResult(
+        data?.summary ?? data?.error ?? (res.ok ? "Terkirim." : "Gagal mengirim ke provider."),
+      );
+      router.refresh();
+    } catch {
+      setDispatchResult("Tidak dapat menghubungi server.");
+    } finally {
+      setIsDispatching(false);
+    }
+  }
 
   async function handleSave() {
     setIsSaving(true);
@@ -89,6 +111,19 @@ export function OrderActions({ order }: OrderActionsProps) {
       <Button size="sm" onClick={handleSave} disabled={isSaving} className="w-full">
         {isSaving ? "Menyimpan..." : "Simpan"}
       </Button>
+
+      {DISPATCHABLE_STATUSES.includes(order.status) && (
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={handleDispatch}
+          disabled={isDispatching}
+          className="w-full"
+        >
+          {isDispatching ? "Mengirim..." : "Kirim ke Provider"}
+        </Button>
+      )}
+      {dispatchResult ? <p className="text-xs text-muted">{dispatchResult}</p> : null}
     </div>
   );
 }
