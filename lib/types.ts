@@ -24,6 +24,13 @@ export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
 // what the admin fulfillment queue filters on by default.
 export const ACTIONABLE_STATUSES: OrderStatus[] = ["PAID", "PROCESSING"];
 
+// Single source of truth for game/product categories — used by the admin
+// create/edit form, the /games filter tabs, and the zod validation schemas,
+// so adding a category never means hunting down multiple duplicated lists.
+export const GAME_CATEGORIES = ["Mobile Game", "PC Game", "Voucher", "PPOB"] as const;
+
+export type GameCategory = (typeof GAME_CATEGORIES)[number];
+
 export const BADGE_GRADIENTS = [
   ["#8B5CF6", "#6366F1"],
   ["#6366F1", "#06B6D4"],

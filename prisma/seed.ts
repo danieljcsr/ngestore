@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { hashPassword } from "../lib/password";
+import type { GameCategory } from "../lib/types";
 
 const prisma = new PrismaClient();
 
@@ -13,7 +14,7 @@ type SeedDenomination = {
 type SeedGame = {
   name: string;
   slug: string;
-  category: "Mobile Game" | "PC Game" | "Voucher";
+  category: GameCategory;
   badgeLabel: string;
   badgeFrom: string;
   badgeTo: string;
@@ -221,6 +222,57 @@ const GAMES: SeedGame[] = [
       { name: "Rp 100.000", price: 105000 },
       { name: "Rp 150.000", price: 156000 },
       { name: "Rp 300.000", price: 309000 },
+    ],
+  },
+  {
+    name: "Pulsa All Operator",
+    slug: "pulsa-all-operator",
+    category: "PPOB",
+    badgeLabel: "PULSA",
+    badgeFrom: "#22C55E",
+    badgeTo: "#06B6D4",
+    playerIdLabel: "Nomor HP",
+    instructions: "Masukkan nomor HP aktif tanpa spasi, contoh: 081234567890.",
+    denominations: [
+      { name: "Pulsa Rp 5.000", price: 6500 },
+      { name: "Pulsa Rp 10.000", price: 11500 },
+      { name: "Pulsa Rp 20.000", price: 21500, isPopular: true },
+      { name: "Pulsa Rp 25.000", price: 26500 },
+      { name: "Pulsa Rp 50.000", price: 51500 },
+      { name: "Pulsa Rp 100.000", price: 101500 },
+    ],
+  },
+  {
+    name: "Token Listrik PLN",
+    slug: "token-listrik-pln",
+    category: "PPOB",
+    badgeLabel: "PLN",
+    badgeFrom: "#F59E0B",
+    badgeTo: "#EF4444",
+    playerIdLabel: "Nomor Meter / ID Pelanggan",
+    instructions: "Nomor meter/ID pelanggan bisa dilihat di struk terakhir atau meteran listrik.",
+    denominations: [
+      { name: "Token Rp 20.000", price: 22500 },
+      { name: "Token Rp 50.000", price: 52500, isPopular: true },
+      { name: "Token Rp 100.000", price: 102500 },
+      { name: "Token Rp 200.000", price: 202500 },
+      { name: "Token Rp 500.000", price: 502500 },
+    ],
+  },
+  {
+    name: "Paket Data Internet",
+    slug: "paket-data-internet",
+    category: "PPOB",
+    badgeLabel: "DATA",
+    badgeFrom: "#6366F1",
+    badgeTo: "#06B6D4",
+    playerIdLabel: "Nomor HP",
+    instructions: "Masukkan nomor HP aktif tanpa spasi, contoh: 081234567890.",
+    denominations: [
+      { name: "1GB / 30 Hari", price: 15000 },
+      { name: "3GB / 30 Hari", price: 35000 },
+      { name: "5GB / 30 Hari", price: 55000, isPopular: true },
+      { name: "10GB / 30 Hari", price: 95000 },
     ],
   },
 ];

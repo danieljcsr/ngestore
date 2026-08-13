@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { GAME_CATEGORIES } from "@/lib/types";
 
 export const gameCreateSchema = z.object({
   name: z.string().min(2).max(100),
@@ -7,7 +8,7 @@ export const gameCreateSchema = z.object({
     .min(2)
     .max(100)
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug hanya boleh huruf kecil, angka, dan tanda hubung."),
-  category: z.enum(["Mobile Game", "PC Game", "Voucher"]),
+  category: z.enum(GAME_CATEGORIES),
   badgeLabel: z.string().min(1).max(6),
   badgeFrom: z.string().min(4).max(9),
   badgeTo: z.string().min(4).max(9),
@@ -36,7 +37,7 @@ export const gameUpdateSchema = z.object({
     .max(100)
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug hanya boleh huruf kecil, angka, dan tanda hubung.")
     .optional(),
-  category: z.enum(["Mobile Game", "PC Game", "Voucher"]).optional(),
+  category: z.enum(GAME_CATEGORIES).optional(),
   badgeLabel: z.string().min(1).max(6).optional(),
   badgeFrom: z.string().min(4).max(9).optional(),
   badgeTo: z.string().min(4).max(9).optional(),

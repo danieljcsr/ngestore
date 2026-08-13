@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { GameIcon } from "@/components/ui/GameIcon";
 import { Input, Label, Textarea } from "@/components/ui/Input";
+import { GAME_CATEGORIES } from "@/lib/types";
 
 type GameData = {
   id: string;
@@ -28,7 +29,6 @@ type Props =
   | { mode: "create"; game?: undefined }
   | { mode: "edit"; game: GameData };
 
-const CATEGORY_OPTIONS = ["Mobile Game", "PC Game", "Voucher"] as const;
 
 function slugify(value: string) {
   return value
@@ -45,7 +45,7 @@ export function GameForm({ mode, game }: Props) {
   const [name, setName] = useState(game?.name ?? "");
   const [slug, setSlug] = useState(game?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(mode === "edit");
-  const [category, setCategory] = useState<string>(game?.category ?? CATEGORY_OPTIONS[0]);
+  const [category, setCategory] = useState<string>(game?.category ?? GAME_CATEGORIES[0]);
   const [badgeLabel, setBadgeLabel] = useState(game?.badgeLabel ?? "");
   const [badgeFrom, setBadgeFrom] = useState(game?.badgeFrom ?? "#8B5CF6");
   const [badgeTo, setBadgeTo] = useState(game?.badgeTo ?? "#6366F1");
@@ -215,7 +215,7 @@ export function GameForm({ mode, game }: Props) {
             onChange={(e) => setCategory(e.target.value)}
             className="w-full rounded-xl border border-border bg-surface-2 px-4 py-3 text-sm text-foreground outline-none transition focus:border-brand-indigo focus:ring-2 focus:ring-brand-indigo/30"
           >
-            {CATEGORY_OPTIONS.map((option) => (
+            {GAME_CATEGORIES.map((option) => (
               <option key={option} value={option}>
                 {option}
               </option>

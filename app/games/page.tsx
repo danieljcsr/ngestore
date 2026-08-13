@@ -5,17 +5,15 @@ import { GameCard } from "@/components/home/GameCard";
 import { GameSearchBar } from "@/components/home/GameSearchBar";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/cn";
+import { GAME_CATEGORIES, type GameCategory } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "Semua Game",
   description: "Jelajahi semua game yang tersedia untuk top up di NgeStore.",
 };
 
-const CATEGORIES = ["Mobile Game", "PC Game", "Voucher"] as const;
-type Category = (typeof CATEGORIES)[number];
-
-function isCategory(value: string | undefined): value is Category {
-  return !!value && (CATEGORIES as readonly string[]).includes(value);
+function isCategory(value: string | undefined): value is GameCategory {
+  return !!value && (GAME_CATEGORIES as readonly string[]).includes(value);
 }
 
 export default async function GamesPage({
@@ -66,7 +64,7 @@ export default async function GamesPage({
 
   const tabs: { label: string; value: string | undefined }[] = [
     { label: "Semua", value: undefined },
-    ...CATEGORIES.map((c) => ({ label: c, value: c })),
+    ...GAME_CATEGORIES.map((c) => ({ label: c, value: c })),
   ];
 
   function tabHref(value: string | undefined) {
