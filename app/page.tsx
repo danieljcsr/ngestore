@@ -6,6 +6,13 @@ import { GameCard } from "@/components/home/GameCard";
 import { HowItWorks } from "@/components/home/HowItWorks";
 import { prisma } from "@/lib/prisma";
 
+// Without this, Next.js prerenders the homepage once at build time (it has no
+// per-request input like searchParams/cookies to force dynamic rendering) and
+// then serves that snapshot forever — so admin changes (new photo, featured
+// toggle, price) would never appear here until the next deploy, even though
+// every other catalog page (/games, /game/[slug]) already queries fresh.
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const featuredGames = await prisma.game.findMany({
     where: { isActive: true, isFeatured: true },
