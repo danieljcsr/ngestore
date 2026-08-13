@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { GameIcon } from "@/components/ui/GameIcon";
-import { formatRupiah } from "@/lib/format";
 
 export type GameCardProps = {
   slug: string;
@@ -10,7 +9,6 @@ export type GameCardProps = {
   badgeFrom: string;
   badgeTo: string;
   imageUrl?: string | null;
-  startingPrice: number | null;
 };
 
 export function GameCard({
@@ -21,7 +19,6 @@ export function GameCard({
   badgeFrom,
   badgeTo,
   imageUrl,
-  startingPrice,
 }: GameCardProps) {
   return (
     <Link
@@ -35,11 +32,6 @@ export function GameCard({
         </h3>
         <p className="text-xs text-muted">{category}</p>
       </div>
-      <p className="mt-auto text-xs font-medium text-brand-cyan sm:text-sm">
-        {startingPrice !== null
-          ? `Mulai dari ${formatRupiah(startingPrice)}`
-          : "Segera hadir"}
-      </p>
     </Link>
   );
 }

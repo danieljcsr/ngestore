@@ -31,11 +31,14 @@ export default async function GamesPage({
       ...(category ? { category } : {}),
     },
     orderBy: { sortOrder: "asc" },
-    include: {
-      denominations: {
-        where: { isActive: true },
-        select: { price: true },
-      },
+    select: {
+      slug: true,
+      name: true,
+      category: true,
+      badgeLabel: true,
+      badgeFrom: true,
+      badgeTo: true,
+      imageUrl: true,
     },
   });
 
@@ -44,23 +47,9 @@ export default async function GamesPage({
   // requires an explicit `mode: "insensitive"` that SQLite (local dev) doesn't
   // support, so a DB-level filter would silently behave differently in each place.
   const normalizedQuery = query.toLowerCase();
-  const matchedGames = normalizedQuery
+  const gameCards = normalizedQuery
     ? games.filter((game) => game.name.toLowerCase().includes(normalizedQuery))
     : games;
-
-  const gameCards = matchedGames.map((game) => {
-    const prices = game.denominations.map((d) => d.price);
-    return {
-      slug: game.slug,
-      name: game.name,
-      category: game.category,
-      badgeLabel: game.badgeLabel,
-      badgeFrom: game.badgeFrom,
-      badgeTo: game.badgeTo,
-      imageUrl: game.imageUrl,
-      startingPrice: prices.length > 0 ? Math.min(...prices) : null,
-    };
-  });
 
   const tabs: { label: string; value: string | undefined }[] = [
     { label: "Semua", value: undefined },

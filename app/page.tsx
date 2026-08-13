@@ -14,29 +14,18 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const featuredGames = await prisma.game.findMany({
+  const games = await prisma.game.findMany({
     where: { isActive: true, isFeatured: true },
     orderBy: { sortOrder: "asc" },
-    include: {
-      denominations: {
-        where: { isActive: true },
-        select: { price: true },
-      },
+    select: {
+      slug: true,
+      name: true,
+      category: true,
+      badgeLabel: true,
+      badgeFrom: true,
+      badgeTo: true,
+      imageUrl: true,
     },
-  });
-
-  const games = featuredGames.map((game) => {
-    const prices = game.denominations.map((d) => d.price);
-    return {
-      slug: game.slug,
-      name: game.name,
-      category: game.category,
-      badgeLabel: game.badgeLabel,
-      badgeFrom: game.badgeFrom,
-      badgeTo: game.badgeTo,
-      imageUrl: game.imageUrl,
-      startingPrice: prices.length > 0 ? Math.min(...prices) : null,
-    };
   });
 
   return (
