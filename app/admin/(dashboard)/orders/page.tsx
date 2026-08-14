@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/cn";
-import { formatRupiah, formatDateTime } from "@/lib/format";
+import { formatRupiah, formatDateTime, whatsappLink } from "@/lib/format";
 import { ACTIONABLE_STATUSES, type OrderStatus } from "@/lib/types";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { Card } from "@/components/ui/Card";
@@ -109,7 +109,22 @@ export default async function AdminOrdersPage({
                   </td>
                   <td className="px-4 py-3 text-foreground">
                     <p>{order.contactName}</p>
-                    <p className="text-xs text-muted">{order.contactWhatsapp}</p>
+                    <a
+                      href={whatsappLink(order.contactWhatsapp)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-brand-cyan underline underline-offset-2 hover:text-brand-cyan/80"
+                    >
+                      {order.contactWhatsapp}
+                    </a>
+                    {order.contactEmail && (
+                      <a
+                        href={`mailto:${order.contactEmail}`}
+                        className="block text-xs text-muted underline underline-offset-2 hover:text-foreground"
+                      >
+                        {order.contactEmail}
+                      </a>
+                    )}
                   </td>
                   <td className="px-4 py-3 font-semibold text-foreground">
                     {formatRupiah(order.amount)}
