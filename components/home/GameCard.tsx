@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { GameIcon } from "@/components/ui/GameIcon";
 
 export type GameCardProps = {
   slug: string;
@@ -23,14 +22,34 @@ export function GameCard({
   return (
     <Link
       href={`/game/${slug}`}
-      className="card-surface group flex flex-col items-center gap-3 rounded-2xl p-4 text-center transition hover:-translate-y-1 hover:border-brand-indigo/60 hover:shadow-lg hover:shadow-brand-indigo/10 sm:p-5"
+      className="group relative block aspect-[3/4] overflow-hidden rounded-2xl border border-border shadow-lg transition duration-300 hover:-translate-y-1 hover:border-brand-indigo/60 hover:shadow-xl hover:shadow-brand-indigo/20"
     >
-      <GameIcon label={badgeLabel} from={badgeFrom} to={badgeTo} imageUrl={imageUrl} alt={name} size="lg" />
-      <div className="flex min-w-0 flex-col gap-1">
-        <h3 className="truncate text-sm font-semibold text-foreground sm:text-base">
-          {name}
-        </h3>
-        <p className="text-xs text-muted">{category}</p>
+      {imageUrl ? (
+        // Plain <img>, not next/image: this is an external, admin-uploaded file whose
+        // Vercel Blob hostname is per-store (random subdomain), so it can't be
+        // allowlisted in next.config.ts ahead of time.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={imageUrl}
+          alt={name}
+          className="absolute inset-0 h-full w-full object-cover transition duration-300 group-hover:scale-105"
+        />
+      ) : (
+        <div
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ backgroundImage: `linear-gradient(135deg, ${badgeFrom}, ${badgeTo})` }}
+        >
+          <span className="select-none text-5xl font-extrabold text-white/25 sm:text-6xl">
+            {badgeLabel}
+          </span>
+        </div>
+      )}
+
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent" />
+
+      <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4">
+        <h3 className="truncate text-sm font-bold text-white sm:text-base">{name}</h3>
+        <p className="truncate text-xs text-white/70">{category}</p>
       </div>
     </Link>
   );
