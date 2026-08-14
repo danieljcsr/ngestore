@@ -184,6 +184,12 @@ export function ProviderSettingsForm({
                 : "https://api.provider-anda.com/v1/transaction"
             }
           />
+          <p className="mt-1 text-xs text-muted">
+            Isi URL lengkap endpoint transaksi/pembelian, bukan cuma &ldquo;base_url&rdquo;
+            dari dokumentasi provider — biasanya ada akhiran seperti /purchase atau
+            /transaction. Kalau cuma base_url yang diisi, request akan gagal dengan error
+            404 Not Found.
+          </p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">

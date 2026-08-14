@@ -113,7 +113,11 @@ function parseBearerJsonResponse(body: unknown): ParsedResponse {
   return {
     status: firstString(data, ["rc"]),
     message: firstString(data, ["message"]),
-    trxId: firstString(data, ["trxid", "sn"]),
+    // `sn` is the actual serial number/voucher redemption code — the thing an
+    // admin or customer would need as proof of delivery. `trxid` is just
+    // MCW's internal numeric reference and is present even while pending (sn
+    // is empty then), so it's only used as a fallback when sn isn't set yet.
+    trxId: firstString(data, ["sn", "trxid"]),
   };
 }
 
@@ -218,10 +222,15 @@ export async function dispatchOrderToProvider(orderId: string): Promise<Provider
 
     const json = await response.json().catch(() => null);
     const parsed = parseProviderResponse(format, json);
-    // An HTTP-level failure (4xx/5xx) is always treated as failed, regardless
-    // of what the (possibly error-page) body happens to contain — never let
-    // a non-2xx response be read as success/pending.
-    const classified = response.ok ? classifyStatus(format, parsed.status) : "failed";
+    // Trust a successfully-parsed status code from the body over the raw
+    // HTTP status: confirmed live against Media Cakrawangsa that they return
+    // structured rc-coded JSON (e.g. rc "05" produk tidak dikenali) on 4xx
+    // responses, not just on 2xx. Only force "failed" when the body couldn't
+    // be parsed into a status at all (e.g. a gateway/error HTML page) and the
+    // HTTP call itself also failed — never let that unparseable case be read
+    // as success/pending.
+    const classified =
+      parsed.status !== null ? classifyStatus(format, parsed.status) : response.ok ? "unknown" : "failed";
     // Only move an order forward from PAID/PROCESSING. If an admin has since
     // manually set it to FAILED/CANCELLED/etc (e.g. a refund decision), a
     // dispatch response — automatic or a manual retry — must never overturn
