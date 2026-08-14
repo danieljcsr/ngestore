@@ -3,6 +3,11 @@ import { prisma } from "@/lib/prisma";
 import { generateOrderCode } from "@/lib/order-code";
 import { getSnapClient } from "@/lib/midtrans";
 import { checkoutSchema } from "@/lib/validation/checkout";
+import {
+  DEFAULT_MAINTENANCE_MESSAGE,
+  getMaintenanceSettings,
+  isWithinMaintenanceWindow,
+} from "@/lib/maintenance";
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,6 +25,14 @@ export async function POST(request: NextRequest) {
     if (!parsed.success) {
       const message = parsed.error.issues[0]?.message ?? "Data yang dikirim tidak valid.";
       return NextResponse.json({ error: message }, { status: 400 });
+    }
+
+    const maintenance = await getMaintenanceSettings();
+    if (isWithinMaintenanceWindow(maintenance)) {
+      return NextResponse.json(
+        { error: maintenance.message || DEFAULT_MAINTENANCE_MESSAGE },
+        { status: 503 },
+      );
     }
 
     const { gameId, denominationId, playerId, zoneId, contactName, contactWhatsapp, contactEmail } =

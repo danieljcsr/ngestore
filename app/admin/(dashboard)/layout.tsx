@@ -19,6 +19,7 @@ export default async function AdminDashboardLayout({
     { href: "/admin/orders", label: "Pesanan" },
     { href: "/admin/games", label: "Katalog Game" },
     { href: "/admin/settings", label: "Pengaturan Provider" },
+    { href: "/admin/maintenance", label: "Jam Operasional" },
   ];
 
   return (

@@ -50,9 +50,13 @@ const SNAP_SRC =
 export function CheckoutForm({
   game,
   denominations,
+  maintenanceActive,
+  maintenanceMessage,
 }: {
   game: GameData;
   denominations: DenominationData[];
+  maintenanceActive: boolean;
+  maintenanceMessage: string;
 }) {
   const router = useRouter();
 
@@ -71,6 +75,7 @@ export function CheckoutForm({
   );
 
   const canSubmit =
+    !maintenanceActive &&
     !submitting &&
     selectedDenomination !== null &&
     playerId.trim().length > 0 &&
@@ -169,6 +174,12 @@ export function CheckoutForm({
         data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
         strategy="afterInteractive"
       />
+
+      {maintenanceActive && (
+        <div className="mb-6 rounded-xl border border-warning/30 bg-warning/10 px-4 py-3 text-sm text-warning">
+          {maintenanceMessage}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="flex flex-col gap-6 lg:col-span-2">
@@ -305,7 +316,7 @@ export function CheckoutForm({
             )}
 
             <Button type="submit" size="lg" disabled={!canSubmit} className="w-full">
-              {submitting ? "Memproses..." : "Bayar Sekarang"}
+              {maintenanceActive ? "Transaksi Ditutup" : submitting ? "Memproses..." : "Bayar Sekarang"}
             </Button>
 
             <p className="text-center text-xs text-muted">

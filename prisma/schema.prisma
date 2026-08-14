@@ -162,6 +162,22 @@ model ProviderSetting {
   updatedAt DateTime @updatedAt
 }
 
+// Singleton, same pattern as ProviderSetting. Lets the store owner close
+// checkout during a fixed daily window (e.g. 23:00-01:00 WIB) without a
+// redeploy. startTime/endTime are "HH:mm" in Asia/Jakarta (WIB) — see
+// lib/maintenance.ts for the window check, which handles a window that
+// wraps past midnight (start > end).
+model MaintenanceSetting {
+  id        String  @id @default(cuid())
+  isEnabled Boolean @default(false)
+  startTime String  @default("23:00")
+  endTime   String  @default("01:00")
+  message   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model AdminUser {
   id                 String    @id @default(cuid())
   email              String    @unique

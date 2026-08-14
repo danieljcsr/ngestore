@@ -1,5 +1,10 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import {
+  DEFAULT_MAINTENANCE_MESSAGE,
+  getMaintenanceSettings,
+  isWithinMaintenanceWindow,
+} from "@/lib/maintenance";
 import { Container } from "@/components/ui/Container";
 import { Card } from "@/components/ui/Card";
 import { GameIcon } from "@/components/ui/GameIcon";
@@ -23,6 +28,10 @@ export default async function GameDetailPage(props: {
   if (!game || !game.isActive) {
     notFound();
   }
+
+  const maintenance = await getMaintenanceSettings();
+  const maintenanceActive = isWithinMaintenanceWindow(maintenance);
+  const maintenanceMessage = maintenance.message || DEFAULT_MAINTENANCE_MESSAGE;
 
   const gameData = {
     id: game.id,
@@ -70,7 +79,12 @@ export default async function GameDetailPage(props: {
       )}
 
       <div className="mt-8">
-        <CheckoutForm game={gameData} denominations={denominations} />
+        <CheckoutForm
+          game={gameData}
+          denominations={denominations}
+          maintenanceActive={maintenanceActive}
+          maintenanceMessage={maintenanceMessage}
+        />
       </div>
     </Container>
   );
