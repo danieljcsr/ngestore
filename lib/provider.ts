@@ -3,16 +3,25 @@ import { ProxyAgent, fetch as undiciFetch } from "undici";
 import { prisma } from "@/lib/prisma";
 
 // Talks to whatever automatic top-up supplier (H2H provider) the store owner
-// configures from /admin/settings — this is deliberately generic rather than
-// tied to one named provider, since the exact provider isn't chosen yet.
+// configures from /admin/settings. Two request/response shapes are supported
+// out of the box, selected via ProviderSetting.requestFormat:
 //
-// The request shape (username + buyer_sku_code + customer_no + ref_id[+sign])
-// and the "Sukses / Pending / Gagal" status vocabulary match Digiflazz, which
-// is both the most common H2H provider in Indonesia and the API shape many
-// smaller/reseller panels clone outright. If the eventual provider differs,
-// this file — buildRequestBody(), parseProviderResponse(), classifyStatus()
-// — is the isolated place to adjust; nothing outside lib/provider.ts needs to
-// change.
+//   "digiflazz"   — username + buyer_sku_code + customer_no + ref_id[+ md5
+//                   sign], response has a text `status` field
+//                   ("Sukses"/"Pending"/"Gagal"). Matches Digiflazz and the
+//                   many reseller panels that clone its API outright.
+//
+//   "bearer_json" — Authorization: Bearer {apiKey}, JSON body
+//                   {code, msisdn, request_id}, response has a numeric `rc`
+//                   response code ("00" = sukses, "68" = pending, anything
+//                   else = a specific failure reason). Matches the H2H API
+//                   documented by Media Cakrawangsa and similar panels.
+//
+// If a future provider needs a third shape, add a case to buildRequest() and
+// parseProviderResponse()/classify() below — nothing outside this file needs
+// to change.
+
+export type RequestFormat = "digiflazz" | "bearer_json";
 
 export type ProviderDispatchOutcome =
   | "success"
@@ -60,11 +69,17 @@ function firstString(record: UnknownRecord, keys: string[]): string | null {
   return null;
 }
 
-function parseProviderResponse(body: unknown): {
+type ParsedResponse = {
   status: string | null;
   message: string | null;
   trxId: string | null;
-} {
+};
+
+type ClassifiedStatus = "success" | "pending" | "failed" | "unknown";
+
+// --- digiflazz-style parsing (text status field) ---
+
+function parseDigiflazzResponse(body: unknown): ParsedResponse {
   const root = asRecord(body);
   // Digiflazz-style responses nest everything under `data`; plenty of clone
   // APIs flatten it to the top level — check both.
@@ -76,7 +91,7 @@ function parseProviderResponse(body: unknown): {
   };
 }
 
-function classifyStatus(status: string | null): "success" | "pending" | "failed" | "unknown" {
+function classifyDigiflazzStatus(status: string | null): ClassifiedStatus {
   if (!status) return "unknown";
   const normalized = status.toLowerCase();
   if (["sukses", "success", "completed", "sccs"].includes(normalized)) return "success";
@@ -85,6 +100,38 @@ function classifyStatus(status: string | null): "success" | "pending" | "failed"
   }
   if (["pending", "processing", "diproses", "process"].includes(normalized)) return "pending";
   return "unknown";
+}
+
+// --- bearer_json-style parsing (numeric "rc" response code) ---
+// rc "00" = sukses, "68" = pending menunggu callback, anything else present
+// is one of their documented failure/error codes (invalid payload, saldo
+// tidak cukup, produk ditutup, dll) — treated as failed either way, with the
+// exact reason preserved in `message`/providerStatus for the admin to see.
+
+function parseBearerJsonResponse(body: unknown): ParsedResponse {
+  const data = asRecord(body);
+  return {
+    status: firstString(data, ["rc"]),
+    message: firstString(data, ["message"]),
+    trxId: firstString(data, ["trxid", "sn"]),
+  };
+}
+
+function classifyBearerJsonStatus(rc: string | null): ClassifiedStatus {
+  if (!rc) return "unknown";
+  if (rc === "00") return "success";
+  if (rc === "68") return "pending";
+  return "failed";
+}
+
+function parseProviderResponse(format: RequestFormat, body: unknown): ParsedResponse {
+  return format === "bearer_json" ? parseBearerJsonResponse(body) : parseDigiflazzResponse(body);
+}
+
+function classifyStatus(format: RequestFormat, status: string | null): ClassifiedStatus {
+  return format === "bearer_json"
+    ? classifyBearerJsonStatus(status)
+    : classifyDigiflazzStatus(status);
 }
 
 // Sends a PAID order to the configured supplier. Always resolves (never
@@ -96,9 +143,15 @@ export async function dispatchOrderToProvider(orderId: string): Promise<Provider
   if (!order) return { outcome: "error", message: "Pesanan tidak ditemukan." };
 
   const settings = await getProviderSettings();
-  if (!settings.isEnabled || !settings.apiBaseUrl || !settings.apiUsername || !settings.apiKey) {
+  const format = (settings.requestFormat as RequestFormat) ?? "digiflazz";
+  if (!settings.isEnabled || !settings.apiBaseUrl || !settings.apiKey) {
     return { outcome: "not_configured" };
   }
+  if (format === "digiflazz" && !settings.apiUsername) {
+    return { outcome: "not_configured" };
+  }
+  const apiBaseUrl = settings.apiBaseUrl;
+  const apiKey = settings.apiKey;
 
   // Never ship product for an order that isn't actually paid. The automatic
   // caller only ever reaches here right after confirming PAID, and the admin
@@ -124,17 +177,24 @@ export async function dispatchOrderToProvider(orderId: string): Promise<Provider
   const refId = order.providerRefId ?? order.orderCode;
   const customerNo = buildCustomerNo(order.playerId, order.zoneId);
 
-  const body: UnknownRecord = {
-    username: settings.apiUsername,
-    buyer_sku_code: denomination.providerSku,
-    customer_no: customerNo,
-    ref_id: refId,
-  };
-  if (settings.useMd5Signature) {
-    body.sign = buildSignature(settings.apiUsername, settings.apiKey, refId);
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  let body: UnknownRecord;
+
+  if (format === "bearer_json") {
+    headers.Authorization = `Bearer ${apiKey}`;
+    body = { code: denomination.providerSku, msisdn: customerNo, request_id: refId };
+  } else {
+    body = {
+      username: settings.apiUsername,
+      buyer_sku_code: denomination.providerSku,
+      customer_no: customerNo,
+      ref_id: refId,
+    };
+    if (settings.useMd5Signature && settings.apiUsername) {
+      body.sign = buildSignature(settings.apiUsername, apiKey, refId);
+    }
+    headers.Authorization = `Bearer ${apiKey}`;
   }
-  // Some providers require a transaction PIN in addition to the API key
-  // (often paired with IP whitelisting) — sent only when configured.
   if (settings.transactionPin) {
     body.pin = settings.transactionPin;
   }
@@ -148,23 +208,20 @@ export async function dispatchOrderToProvider(orderId: string): Promise<Provider
       ? new ProxyAgent(settings.outboundProxyUrl)
       : undefined;
 
-    const response = await undiciFetch(settings.apiBaseUrl, {
+    const response = await undiciFetch(apiBaseUrl, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${settings.apiKey}`,
-      },
+      headers,
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(20000),
       ...(dispatcher ? { dispatcher } : {}),
     });
 
     const json = await response.json().catch(() => null);
-    const parsed = parseProviderResponse(json);
+    const parsed = parseProviderResponse(format, json);
     // An HTTP-level failure (4xx/5xx) is always treated as failed, regardless
     // of what the (possibly error-page) body happens to contain — never let
     // a non-2xx response be read as success/pending.
-    const classified = response.ok ? classifyStatus(parsed.status) : "failed";
+    const classified = response.ok ? classifyStatus(format, parsed.status) : "failed";
     // Only move an order forward from PAID/PROCESSING. If an admin has since
     // manually set it to FAILED/CANCELLED/etc (e.g. a refund decision), a
     // dispatch response — automatic or a manual retry — must never overturn

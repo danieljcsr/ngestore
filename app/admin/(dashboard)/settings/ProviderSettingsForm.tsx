@@ -6,12 +6,15 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input, Label } from "@/components/ui/Input";
 
+type RequestFormat = "digiflazz" | "bearer_json";
+
 type ProviderSettingsData = {
   isEnabled: boolean;
   providerName: string;
   apiBaseUrl: string | null;
   apiUsername: string | null;
   apiKey: string | null;
+  requestFormat: RequestFormat;
   useMd5Signature: boolean;
   transactionPin: string | null;
   outboundProxyUrl: string | null;
@@ -38,6 +41,7 @@ export function ProviderSettingsForm({
   const [apiUsername, setApiUsername] = useState(settings.apiUsername ?? "");
   const [apiKey, setApiKey] = useState(settings.apiKey ?? "");
   const [showApiKey, setShowApiKey] = useState(false);
+  const [requestFormat, setRequestFormat] = useState<RequestFormat>(settings.requestFormat);
   const [useMd5Signature, setUseMd5Signature] = useState(settings.useMd5Signature);
   const [transactionPin, setTransactionPin] = useState(settings.transactionPin ?? "");
   const [showPin, setShowPin] = useState(false);
@@ -59,8 +63,16 @@ export function ProviderSettingsForm({
     setError(null);
     setSaved(false);
 
-    if (isEnabled && (!apiBaseUrl.trim() || !apiUsername.trim() || !apiKey.trim())) {
-      setError("Isi URL API, Username, dan API Key dulu sebelum mengaktifkan.");
+    const usernameRequired = requestFormat === "digiflazz";
+    if (
+      isEnabled &&
+      (!apiBaseUrl.trim() || !apiKey.trim() || (usernameRequired && !apiUsername.trim()))
+    ) {
+      setError(
+        usernameRequired
+          ? "Isi URL API, Username, dan API Key dulu sebelum mengaktifkan."
+          : "Isi URL API dan API Key dulu sebelum mengaktifkan.",
+      );
       setSaving(false);
       return;
     }
@@ -75,6 +87,7 @@ export function ProviderSettingsForm({
           apiBaseUrl: apiBaseUrl.trim() || null,
           apiUsername: apiUsername.trim() || null,
           apiKey: apiKey.trim() || null,
+          requestFormat,
           useMd5Signature,
           transactionPin: transactionPin.trim() || null,
           outboundProxyUrl: outboundProxyUrl.trim() || null,
@@ -138,8 +151,25 @@ export function ProviderSettingsForm({
             id="providerName"
             value={providerName}
             onChange={(e) => setProviderName(e.target.value)}
-            placeholder="misal: Digiflazz"
+            placeholder="misal: Media Cakrawangsa"
           />
+        </div>
+
+        <div>
+          <Label htmlFor="requestFormat">Format API</Label>
+          <select
+            id="requestFormat"
+            value={requestFormat}
+            onChange={(e) => setRequestFormat(e.target.value as RequestFormat)}
+            className="h-11 w-full rounded-xl border border-border bg-surface-2 px-3 text-sm text-foreground focus:border-brand-indigo focus:outline-none"
+          >
+            <option value="digiflazz">Digiflazz (username + buyer_sku_code + sign MD5)</option>
+            <option value="bearer_json">Bearer Token + JSON (rc numerik, misal Media Cakrawangsa)</option>
+          </select>
+          <p className="mt-1 text-xs text-muted">
+            Sesuaikan dengan dokumentasi API provider Anda. Kalau tidak yakin, tanyakan
+            format request/response ke support provider.
+          </p>
         </div>
 
         <div>
@@ -148,21 +178,29 @@ export function ProviderSettingsForm({
             id="apiBaseUrl"
             value={apiBaseUrl}
             onChange={(e) => setApiBaseUrl(e.target.value)}
-            placeholder="https://api.provider-anda.com/v1/transaction"
+            placeholder={
+              requestFormat === "bearer_json"
+                ? "https://api.provider-anda.com/reseller/api/v1/purchase"
+                : "https://api.provider-anda.com/v1/transaction"
+            }
           />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
+          {requestFormat === "digiflazz" && (
+            <div>
+              <Label htmlFor="apiUsername">Username API</Label>
+              <Input
+                id="apiUsername"
+                value={apiUsername}
+                onChange={(e) => setApiUsername(e.target.value)}
+              />
+            </div>
+          )}
           <div>
-            <Label htmlFor="apiUsername">Username API</Label>
-            <Input
-              id="apiUsername"
-              value={apiUsername}
-              onChange={(e) => setApiUsername(e.target.value)}
-            />
-          </div>
-          <div>
-            <Label htmlFor="apiKey">API Key</Label>
+            <Label htmlFor="apiKey">
+              {requestFormat === "bearer_json" ? "API Key (Bearer Token)" : "API Key"}
+            </Label>
             <div className="flex gap-2">
               <Input
                 id="apiKey"
@@ -204,23 +242,25 @@ export function ProviderSettingsForm({
           </p>
         </div>
 
-        <label className="flex items-center gap-3">
-          <input
-            type="checkbox"
-            checked={useMd5Signature}
-            onChange={(e) => setUseMd5Signature(e.target.checked)}
-            className="h-5 w-5 rounded border-border bg-surface-2 accent-brand-indigo"
-          />
-          <span>
-            <span className="block text-sm font-semibold text-foreground">
-              Gunakan tanda tangan MD5 (standar Digiflazz)
+        {requestFormat === "digiflazz" && (
+          <label className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              checked={useMd5Signature}
+              onChange={(e) => setUseMd5Signature(e.target.checked)}
+              className="h-5 w-5 rounded border-border bg-surface-2 accent-brand-indigo"
+            />
+            <span>
+              <span className="block text-sm font-semibold text-foreground">
+                Gunakan tanda tangan MD5 (standar Digiflazz)
+              </span>
+              <span className="block text-xs text-muted">
+                md5(username + API key + ref_id) dikirim sebagai field &ldquo;sign&rdquo;.
+                Matikan kalau provider Anda tidak memakai skema ini.
+              </span>
             </span>
-            <span className="block text-xs text-muted">
-              md5(username + API key + ref_id) dikirim sebagai field &ldquo;sign&rdquo;.
-              Matikan kalau provider Anda tidak memakai skema ini.
-            </span>
-          </span>
-        </label>
+          </label>
+        )}
       </Card>
 
       <Card className="space-y-4 p-6">

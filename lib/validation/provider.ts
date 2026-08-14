@@ -10,6 +10,7 @@ export const providerSettingSchema = z.object({
   apiBaseUrl: z.string().url().max(500).nullable().optional(),
   apiUsername: z.string().max(200).nullable().optional(),
   apiKey: z.string().max(500).nullable().optional(),
+  requestFormat: z.enum(["digiflazz", "bearer_json"]).optional(),
   useMd5Signature: z.boolean().optional(),
   transactionPin: z.string().max(50).nullable().optional(),
   outboundProxyUrl: z.string().url().max(500).nullable().optional(),

@@ -41,6 +41,7 @@ export async function PATCH(request: NextRequest) {
         ...(data.apiBaseUrl !== undefined ? { apiBaseUrl: data.apiBaseUrl } : {}),
         ...(data.apiUsername !== undefined ? { apiUsername: data.apiUsername } : {}),
         ...(data.apiKey !== undefined ? { apiKey: data.apiKey } : {}),
+        ...(data.requestFormat !== undefined ? { requestFormat: data.requestFormat } : {}),
         ...(data.useMd5Signature !== undefined ? { useMd5Signature: data.useMd5Signature } : {}),
         ...(data.transactionPin !== undefined ? { transactionPin: data.transactionPin } : {}),
         ...(data.outboundProxyUrl !== undefined

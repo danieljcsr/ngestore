@@ -133,10 +133,16 @@ model ProviderSetting {
   apiBaseUrl   String?
   apiUsername  String?
   apiKey       String?
+  // Two request/response shapes are supported out of the box (see
+  // lib/provider.ts): "digiflazz" (username + buyer_sku_code + customer_no +
+  // ref_id[+ md5 sign], text status field) and "bearer_json" (Authorization:
+  // Bearer apiKey, body {code, msisdn, request_id}, numeric "rc" response
+  // code — this is the shape documented by e.g. Media Cakrawangsa).
+  requestFormat String @default("digiflazz")
   // Most Indonesian H2H top-up providers (Digiflazz and many compatible
   // clones) sign requests with md5(username + apiKey + ref_id). Turn this
   // off for a provider that authenticates a different way (e.g. a bearer
-  // token sent as the apiKey value).
+  // token sent as the apiKey value). Only applies to requestFormat "digiflazz".
   useMd5Signature Boolean @default(true)
   // Some providers require a separate transaction PIN in addition to the API
   // key (often used alongside IP whitelisting). Sent as a "pin" field on every

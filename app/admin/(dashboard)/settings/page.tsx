@@ -23,6 +23,7 @@ export default async function ProviderSettingsPage() {
           apiBaseUrl: settings.apiBaseUrl,
           apiUsername: settings.apiUsername,
           apiKey: settings.apiKey,
+          requestFormat: settings.requestFormat as "digiflazz" | "bearer_json",
           useMd5Signature: settings.useMd5Signature,
           transactionPin: settings.transactionPin,
           outboundProxyUrl: settings.outboundProxyUrl,

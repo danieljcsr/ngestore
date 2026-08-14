@@ -17,7 +17,41 @@ function firstString(record: UnknownRecord, keys: string[]): string | null {
   return null;
 }
 
-function classifyStatus(status: string | null): "success" | "pending" | "failed" | "unknown" {
+// Some H2H providers (see docs for the "bearer_json" format, e.g. Media
+// Cakrawangsa) send their async transaction report as XML-RPC rather than
+// JSON — a <methodCall>/<methodResponse> with a flat <member><name>X</name>
+// <value><string>Y</string></value></member> struct. This is a minimal,
+// purpose-built extractor for exactly that shape (not a general XML parser).
+function extractXmlMember(xml: string, name: string): string | null {
+  const match = xml.match(
+    new RegExp(`<name>\\s*${name}\\s*</name>\\s*<value>\\s*<string>([^<]*)</string>`, "i"),
+  );
+  return match ? match[1] : null;
+}
+
+function parseXmlReport(xml: string): UnknownRecord {
+  return {
+    request_id: extractXmlMember(xml, "REQUESTID"),
+    rc: extractXmlMember(xml, "RESPONSECODE"),
+    message: extractXmlMember(xml, "MESSAGE"),
+    trxid: extractXmlMember(xml, "TRANSACTIONID"),
+    sn: extractXmlMember(xml, "SN"),
+  };
+}
+
+function classifyStatus(
+  format: string,
+  data: UnknownRecord,
+): "success" | "pending" | "failed" | "unknown" {
+  if (format === "bearer_json") {
+    const rc = firstString(data, ["rc", "RESPONSECODE"]);
+    if (!rc) return "unknown";
+    if (rc === "00") return "success";
+    if (rc === "68") return "pending";
+    return "failed";
+  }
+
+  const status = firstString(data, ["status", "transaction_status", "result"]);
   if (!status) return "unknown";
   const normalized = status.toLowerCase();
   if (["sukses", "success", "completed", "sccs"].includes(normalized)) return "success";
@@ -35,11 +69,20 @@ function classifyStatus(status: string | null): "success" | "pending" | "failed"
 // proxy.ts; authenticity instead comes from the shared `callbackToken`
 // (as ?token=... or an X-Callback-Token header) configured in /admin/settings.
 export async function POST(request: NextRequest) {
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Payload tidak valid." }, { status: 400 });
+  const rawBody = await request.text();
+  let data: UnknownRecord;
+
+  const trimmed = rawBody.trim();
+  if (trimmed.startsWith("<")) {
+    data = parseXmlReport(trimmed);
+  } else {
+    try {
+      const parsed = JSON.parse(rawBody) as unknown;
+      const root = asRecord(parsed);
+      data = asRecord(root.data ?? root);
+    } catch {
+      return NextResponse.json({ error: "Payload tidak valid." }, { status: 400 });
+    }
   }
 
   const settings = await getProviderSettings();
@@ -50,16 +93,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const root = asRecord(body);
-  const data = asRecord(root.data ?? root);
-
-  const refId = firstString(data, ["ref_id", "reference_id", "trx_id"]);
-  const status = firstString(data, ["status", "transaction_status", "result"]);
-  const message = firstString(data, ["message", "msg", "description"]);
-  const trxId = firstString(data, ["trx_id", "sn", "transaction_id"]);
+  const refId = firstString(data, ["ref_id", "reference_id", "request_id", "REQUESTID", "trx_id"]);
+  const message = firstString(data, ["message", "msg", "description", "MESSAGE"]);
+  const trxId = firstString(data, ["trxid", "trx_id", "sn", "transaction_id", "TRANSACTIONID", "SN"]);
+  const statusRaw = firstString(data, [
+    "rc",
+    "RESPONSECODE",
+    "status",
+    "transaction_status",
+    "result",
+  ]);
 
   if (!refId) {
-    return NextResponse.json({ error: "ref_id tidak ditemukan di payload." }, { status: 400 });
+    return NextResponse.json({ error: "ref_id/request_id tidak ditemukan di payload." }, {
+      status: 400,
+    });
   }
 
   try {
@@ -72,7 +120,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true });
     }
 
-    const classified = classifyStatus(status);
+    const classified = classifyStatus(settings.requestFormat, data);
     // Only PAID/PROCESSING are "in-flight fulfillment" states a callback is
     // allowed to move. This blocks more than the obvious COMPLETED-regression
     // case: if an admin has since manually set the order to FAILED/CANCELLED
@@ -83,7 +131,7 @@ export async function POST(request: NextRequest) {
     await prisma.order.update({
       where: { id: order.id },
       data: {
-        providerStatus: status ?? order.providerStatus,
+        providerStatus: statusRaw ?? order.providerStatus,
         providerMessage: message ?? order.providerMessage,
         ...(trxId ? { providerTrxId: trxId } : {}),
         ...(inFlight && classified === "success"
