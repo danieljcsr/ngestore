@@ -11,5 +11,7 @@ export const providerSettingSchema = z.object({
   apiUsername: z.string().max(200).nullable().optional(),
   apiKey: z.string().max(500).nullable().optional(),
   useMd5Signature: z.boolean().optional(),
+  transactionPin: z.string().max(50).nullable().optional(),
+  outboundProxyUrl: z.string().url().max(500).nullable().optional(),
   callbackToken: z.string().max(200).nullable().optional(),
 });

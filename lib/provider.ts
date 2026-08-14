@@ -1,4 +1,5 @@
 import { createHash } from "crypto";
+import { ProxyAgent, fetch as undiciFetch } from "undici";
 import { prisma } from "@/lib/prisma";
 
 // Talks to whatever automatic top-up supplier (H2H provider) the store owner
@@ -132,9 +133,22 @@ export async function dispatchOrderToProvider(orderId: string): Promise<Provider
   if (settings.useMd5Signature) {
     body.sign = buildSignature(settings.apiUsername, settings.apiKey, refId);
   }
+  // Some providers require a transaction PIN in addition to the API key
+  // (often paired with IP whitelisting) — sent only when configured.
+  if (settings.transactionPin) {
+    body.pin = settings.transactionPin;
+  }
 
   try {
-    const response = await fetch(settings.apiBaseUrl, {
+    // Vercel serverless functions have no fixed outbound IP by default. If
+    // the provider requires IP whitelisting, route through a static-IP proxy
+    // (e.g. Fixie's FIXIE_URL) configured as outboundProxyUrl — otherwise
+    // connect directly, unchanged from before.
+    const dispatcher = settings.outboundProxyUrl
+      ? new ProxyAgent(settings.outboundProxyUrl)
+      : undefined;
+
+    const response = await undiciFetch(settings.apiBaseUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -142,6 +156,7 @@ export async function dispatchOrderToProvider(orderId: string): Promise<Provider
       },
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(20000),
+      ...(dispatcher ? { dispatcher } : {}),
     });
 
     const json = await response.json().catch(() => null);

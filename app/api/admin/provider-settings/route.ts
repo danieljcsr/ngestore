@@ -42,6 +42,10 @@ export async function PATCH(request: NextRequest) {
         ...(data.apiUsername !== undefined ? { apiUsername: data.apiUsername } : {}),
         ...(data.apiKey !== undefined ? { apiKey: data.apiKey } : {}),
         ...(data.useMd5Signature !== undefined ? { useMd5Signature: data.useMd5Signature } : {}),
+        ...(data.transactionPin !== undefined ? { transactionPin: data.transactionPin } : {}),
+        ...(data.outboundProxyUrl !== undefined
+          ? { outboundProxyUrl: data.outboundProxyUrl }
+          : {}),
         ...(data.callbackToken !== undefined ? { callbackToken: data.callbackToken } : {}),
       },
     });

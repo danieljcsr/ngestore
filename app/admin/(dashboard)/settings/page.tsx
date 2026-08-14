@@ -24,6 +24,8 @@ export default async function ProviderSettingsPage() {
           apiUsername: settings.apiUsername,
           apiKey: settings.apiKey,
           useMd5Signature: settings.useMd5Signature,
+          transactionPin: settings.transactionPin,
+          outboundProxyUrl: settings.outboundProxyUrl,
           callbackToken: settings.callbackToken,
         }}
         siteUrl={siteUrl}

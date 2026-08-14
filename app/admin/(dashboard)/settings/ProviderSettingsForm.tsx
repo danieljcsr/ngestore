@@ -13,6 +13,8 @@ type ProviderSettingsData = {
   apiUsername: string | null;
   apiKey: string | null;
   useMd5Signature: boolean;
+  transactionPin: string | null;
+  outboundProxyUrl: string | null;
   callbackToken: string | null;
 };
 
@@ -37,6 +39,9 @@ export function ProviderSettingsForm({
   const [apiKey, setApiKey] = useState(settings.apiKey ?? "");
   const [showApiKey, setShowApiKey] = useState(false);
   const [useMd5Signature, setUseMd5Signature] = useState(settings.useMd5Signature);
+  const [transactionPin, setTransactionPin] = useState(settings.transactionPin ?? "");
+  const [showPin, setShowPin] = useState(false);
+  const [outboundProxyUrl, setOutboundProxyUrl] = useState(settings.outboundProxyUrl ?? "");
   const [callbackToken, setCallbackToken] = useState(settings.callbackToken ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,6 +76,8 @@ export function ProviderSettingsForm({
           apiUsername: apiUsername.trim() || null,
           apiKey: apiKey.trim() || null,
           useMd5Signature,
+          transactionPin: transactionPin.trim() || null,
+          outboundProxyUrl: outboundProxyUrl.trim() || null,
           callbackToken: callbackToken.trim() || null,
         }),
       });
@@ -176,6 +183,27 @@ export function ProviderSettingsForm({
           </div>
         </div>
 
+        <div>
+          <Label htmlFor="transactionPin">PIN Transaksi (opsional)</Label>
+          <div className="flex gap-2">
+            <Input
+              id="transactionPin"
+              type={showPin ? "text" : "password"}
+              value={transactionPin}
+              onChange={(e) => setTransactionPin(e.target.value)}
+              placeholder="Kosongkan kalau provider tidak pakai PIN"
+              className="font-mono"
+            />
+            <Button type="button" variant="secondary" size="md" onClick={() => setShowPin((v) => !v)}>
+              {showPin ? "Sembunyikan" : "Lihat"}
+            </Button>
+          </div>
+          <p className="mt-1 text-xs text-muted">
+            Beberapa provider mewajibkan PIN transaksi tambahan (biasanya dipasangkan
+            dengan whitelist IP). Diisi otomatis ke tiap request kalau field ini terisi.
+          </p>
+        </div>
+
         <label className="flex items-center gap-3">
           <input
             type="checkbox"
@@ -193,6 +221,40 @@ export function ProviderSettingsForm({
             </span>
           </span>
         </label>
+      </Card>
+
+      <Card className="space-y-4 p-6">
+        <div>
+          <h2 className="text-base font-semibold text-foreground">
+            Alamat IP Tetap (Static IP)
+          </h2>
+          <p className="mt-1 text-sm text-muted">
+            Situs ini di-hosting secara serverless, jadi tidak punya alamat IP tetap
+            secara default. Kalau provider Anda mewajibkan whitelist IP, daftar ke
+            layanan static IP (misalnya{" "}
+            <a
+              href="https://usefixie.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-brand-cyan underline"
+            >
+              Fixie
+            </a>{" "}
+            — ada paket gratis), lalu tempel URL proxy yang mereka berikan di sini.
+            Kosongkan kalau provider Anda tidak mewajibkan whitelist IP.
+          </p>
+        </div>
+
+        <div>
+          <Label htmlFor="outboundProxyUrl">URL Proxy Keluar</Label>
+          <Input
+            id="outboundProxyUrl"
+            value={outboundProxyUrl}
+            onChange={(e) => setOutboundProxyUrl(e.target.value)}
+            placeholder="http://user:pass@host:port"
+            className="font-mono"
+          />
+        </div>
       </Card>
 
       <Card className="space-y-4 p-6">

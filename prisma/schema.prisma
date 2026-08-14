@@ -138,6 +138,16 @@ model ProviderSetting {
   // off for a provider that authenticates a different way (e.g. a bearer
   // token sent as the apiKey value).
   useMd5Signature Boolean @default(true)
+  // Some providers require a separate transaction PIN in addition to the API
+  // key (often used alongside IP whitelisting). Sent as a "pin" field on every
+  // dispatch request when set; omitted entirely when null.
+  transactionPin String?
+  // Vercel serverless functions have no fixed outbound IP by default. If your
+  // provider requires IP whitelisting, put an HTTP proxy URL from a static-IP
+  // service here (e.g. Fixie's FIXIE_URL, format http://user:pass@host:port)
+  // and every provider request routes through it instead of connecting
+  // directly. Leave empty to connect directly (default).
+  outboundProxyUrl String?
   // Shared secret the provider's callback URL must include (as ?token=... or
   // an X-Callback-Token header) before an inbound status update is trusted.
   callbackToken String?
