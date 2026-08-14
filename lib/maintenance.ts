@@ -1,7 +1,11 @@
 import { prisma } from "@/lib/prisma";
 
 export async function getMaintenanceSettings() {
-  const existing = await prisma.maintenanceSetting.findFirst();
+  // orderBy makes this deterministic (always the earliest row) if a
+  // check-then-create race ever produces more than one — see the
+  // lib/site-contact.ts comment for how this actually happened in practice
+  // for a sibling singleton settings table.
+  const existing = await prisma.maintenanceSetting.findFirst({ orderBy: { createdAt: "asc" } });
   if (existing) return existing;
   return prisma.maintenanceSetting.create({ data: {} });
 }
