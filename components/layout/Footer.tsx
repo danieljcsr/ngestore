@@ -3,8 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ShieldCheck, Zap, Headset } from "lucide-react";
+import { ShieldCheck, Zap, Headset, MessageCircle, Mail } from "lucide-react";
 import { Container } from "@/components/ui/Container";
+import { whatsappLink } from "@/lib/format";
 
 const FOOTER_LINKS = [
   {
@@ -17,13 +18,23 @@ const FOOTER_LINKS = [
   },
 ];
 
-export function Footer() {
+export function Footer({
+  csWhatsapp,
+  csEmail,
+}: {
+  csWhatsapp: string | null;
+  csEmail: string | null;
+}) {
   const pathname = usePathname();
   if (pathname?.startsWith("/admin")) return null;
 
+  const hasContact = Boolean(csWhatsapp || csEmail);
+
   return (
     <footer className="mt-24 border-t border-border">
-      <Container className="grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
+      <Container
+        className={`grid gap-10 py-14 sm:grid-cols-2 ${hasContact ? "lg:grid-cols-5" : "lg:grid-cols-4"}`}
+      >
         <div className="lg:col-span-2">
           <Image
             src="/logo/ngestore-logo-dark.svg"
@@ -73,6 +84,38 @@ export function Footer() {
             QRIS, transfer bank, dan e-wallet — diproses aman melalui Midtrans.
           </p>
         </div>
+
+        {hasContact && (
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Hubungi Kami</h3>
+            <ul className="mt-4 space-y-2.5">
+              {csWhatsapp && (
+                <li>
+                  <a
+                    href={whatsappLink(csWhatsapp)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-sm text-muted transition hover:text-foreground"
+                  >
+                    <MessageCircle size={15} className="text-brand-cyan" />
+                    {csWhatsapp}
+                  </a>
+                </li>
+              )}
+              {csEmail && (
+                <li>
+                  <a
+                    href={`mailto:${csEmail}`}
+                    className="inline-flex items-center gap-1.5 text-sm text-muted transition hover:text-foreground"
+                  >
+                    <Mail size={15} className="text-brand-cyan" />
+                    {csEmail}
+                  </a>
+                </li>
+              )}
+            </ul>
+          </div>
+        )}
       </Container>
 
       <div className="border-t border-border py-6">

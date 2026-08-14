@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Rajdhani } from "next/font/google";
 import "./globals.css";
+import { getSiteContactSettings } from "@/lib/site-contact";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
@@ -34,7 +35,15 @@ export const viewport = {
   themeColor: "#0b0e1a",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Contact info in the footer is cosmetic — a DB hiccup here must never take
+  // down every page on the site (including this layout's own error/not-found
+  // pages), so fall back to "no contact section" instead of throwing.
+  const contact = await getSiteContactSettings().catch(() => ({
+    csWhatsapp: null,
+    csEmail: null,
+  }));
+
   return (
     <html
       lang="id"
@@ -43,7 +52,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="flex min-h-full flex-col bg-background text-foreground">
         <Header />
         <main className="flex-1">{children}</main>
-        <Footer />
+        <Footer csWhatsapp={contact.csWhatsapp} csEmail={contact.csEmail} />
       </body>
     </html>
   );

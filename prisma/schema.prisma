@@ -178,6 +178,18 @@ model MaintenanceSetting {
   updatedAt DateTime @updatedAt
 }
 
+// Singleton, same pattern as ProviderSetting/MaintenanceSetting. Public
+// contact details shown in the storefront footer — admin-editable so the
+// store owner can update their CS number/email without a redeploy.
+model SiteContactSetting {
+  id         String  @id @default(cuid())
+  csWhatsapp String?
+  csEmail    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model AdminUser {
   id                 String    @id @default(cuid())
   email              String    @unique
