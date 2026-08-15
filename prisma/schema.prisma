@@ -196,6 +196,13 @@ model AdminUser {
   passwordHash       String
   name               String
   role               String    @default("admin")
+  // Gates access to Manajemen Pengguna (view + manage other admin accounts).
+  // Deliberately separate from the free-text `role` label above — `role` is
+  // just a display string an owner can edit freely, so overloading it as the
+  // permission flag would mean retyping it could silently strip access.
+  // There's no UI to grant this to anyone else; it's only ever set via
+  // prisma/seed.ts for the ADMIN_EMAIL account.
+  isOwner            Boolean   @default(false)
   failedLoginAttempts Int      @default(0)
   lockedUntil        DateTime?
   createdAt          DateTime  @default(now())

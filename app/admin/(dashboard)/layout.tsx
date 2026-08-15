@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAdminSession } from "@/lib/auth";
+import { getCurrentAdminIsOwner } from "@/lib/admin-users";
 import { LogoutButton } from "./LogoutButton";
 
 export default async function AdminDashboardLayout({
@@ -15,6 +16,8 @@ export default async function AdminDashboardLayout({
     redirect("/admin/login");
   }
 
+  const isOwner = await getCurrentAdminIsOwner();
+
   const navItems = [
     { href: "/admin", label: "Ringkasan" },
     { href: "/admin/orders", label: "Pesanan" },
@@ -22,7 +25,7 @@ export default async function AdminDashboardLayout({
     { href: "/admin/settings", label: "Pengaturan Provider" },
     { href: "/admin/maintenance", label: "Jam Operasional" },
     { href: "/admin/contact", label: "Kontak & CS" },
-    { href: "/admin/users", label: "Manajemen Pengguna" },
+    ...(isOwner ? [{ href: "/admin/users", label: "Manajemen Pengguna" }] : []),
   ];
 
   return (

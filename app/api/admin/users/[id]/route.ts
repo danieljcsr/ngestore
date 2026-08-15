@@ -3,12 +3,21 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getAdminSession } from "@/lib/auth";
 import { hashPassword } from "@/lib/password";
+import { getCurrentAdminIsOwner } from "@/lib/admin-users";
 import { adminUserUpdateSchema } from "@/lib/validation/admin-users";
 
-// Protected by proxy.ts (matches /api/admin/:path*) — only a logged-in admin reaches here.
+const FORBIDDEN_ERROR = "Hanya pemilik akun yang bisa mengelola pengguna.";
+
+// Protected by proxy.ts (matches /api/admin/:path*) — only a logged-in admin
+// reaches here at all; the isOwner check below further restricts this route
+// to the owner account specifically (Manajemen Pengguna is owner-only).
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    if (!(await getCurrentAdminIsOwner())) {
+      return NextResponse.json({ error: FORBIDDEN_ERROR }, { status: 403 });
+    }
+
     const { id } = await params;
     const body = await request.json();
     const parsed = adminUserUpdateSchema.safeParse(body);
@@ -54,6 +63,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    if (!(await getCurrentAdminIsOwner())) {
+      return NextResponse.json({ error: FORBIDDEN_ERROR }, { status: 403 });
+    }
+
     const { id } = await params;
     const session = await getAdminSession();
 

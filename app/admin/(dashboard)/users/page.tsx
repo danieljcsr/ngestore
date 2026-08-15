@@ -1,8 +1,15 @@
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getAdminSession } from "@/lib/auth";
+import { getCurrentAdminIsOwner } from "@/lib/admin-users";
 import { UsersManager } from "./UsersManager";
 
 export default async function AdminUsersPage() {
+  const isOwner = await getCurrentAdminIsOwner();
+  if (!isOwner) {
+    redirect("/admin");
+  }
+
   const [users, session] = await Promise.all([
     prisma.adminUser.findMany({
       orderBy: { createdAt: "asc" },

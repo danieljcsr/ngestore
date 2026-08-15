@@ -2,12 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/password";
+import { getCurrentAdminIsOwner } from "@/lib/admin-users";
 import { adminUserCreateSchema } from "@/lib/validation/admin-users";
 
-// Protected by proxy.ts (matches /api/admin/:path*) — only a logged-in admin reaches here.
+const FORBIDDEN_ERROR = "Hanya pemilik akun yang bisa mengelola pengguna.";
+
+// Protected by proxy.ts (matches /api/admin/:path*) — only a logged-in admin
+// reaches here at all; the isOwner check below further restricts this route
+// to the owner account specifically (Manajemen Pengguna is owner-only).
 
 export async function GET() {
   try {
+    if (!(await getCurrentAdminIsOwner())) {
+      return NextResponse.json({ error: FORBIDDEN_ERROR }, { status: 403 });
+    }
+
     const users = await prisma.adminUser.findMany({
       orderBy: { createdAt: "asc" },
       select: { id: true, email: true, name: true, role: true, createdAt: true },
@@ -24,6 +33,10 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    if (!(await getCurrentAdminIsOwner())) {
+      return NextResponse.json({ error: FORBIDDEN_ERROR }, { status: 403 });
+    }
+
     const body = await request.json();
     const parsed = adminUserCreateSchema.safeParse(body);
 

@@ -299,8 +299,8 @@ async function seedAdmin() {
 
   await prisma.adminUser.upsert({
     where: { email },
-    update: { passwordHash, failedLoginAttempts: 0, lockedUntil: null },
-    create: { email, passwordHash, name: "Admin NgeStore", role: "admin" },
+    update: { passwordHash, failedLoginAttempts: 0, lockedUntil: null, isOwner: true },
+    create: { email, passwordHash, name: "Admin NgeStore", role: "admin", isOwner: true },
   });
 
   console.log(`Admin siap: ${email}`);
