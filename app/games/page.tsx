@@ -76,14 +76,7 @@ export default async function GamesPage({
     <Container className="py-10 sm:py-14">
       <BannerSlider banners={banners} />
 
-      <div className="mb-8 text-center sm:mb-10">
-        <h1 className="font-display text-4xl font-bold uppercase tracking-wide text-foreground sm:text-5xl">
-          Semua <span className="text-gradient-brand">Game</span>
-        </h1>
-        <p className="mt-2 text-sm text-muted sm:text-base">
-          Cari dan pilih game yang ingin kamu top up.
-        </p>
-      </div>
+      <h1 className="sr-only">Semua Game</h1>
 
       <div className="mx-auto mb-6 max-w-xl">
         <GameSearchBar defaultValue={query} />
