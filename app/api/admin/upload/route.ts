@@ -53,7 +53,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Ukuran gambar maksimal 2MB." }, { status: 400 });
     }
 
-    const blob = await put(`games/${randomUUID()}.${extension}`, file, {
+    const folderRaw = formData.get("folder");
+    // Only known-safe path segments — never forward arbitrary client input into
+    // a blob storage path.
+    const folder = folderRaw === "banners" ? "banners" : "games";
+
+    const blob = await put(`${folder}/${randomUUID()}.${extension}`, file, {
       access: "public",
       contentType: file.type,
     });

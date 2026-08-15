@@ -47,6 +47,23 @@ model Game {
   @@index([isActive, sortOrder])
 }
 
+// Promo slider shown at the top of /games — admin-managed, uploaded via the
+// same Vercel Blob upload endpoint as game cover images.
+model Banner {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  // Where clicking the banner goes — a relative path (e.g. /game/mobile-legends)
+  // or a full URL. Null = the banner isn't clickable.
+  linkUrl   String?
+  altText   String   @default("Promo")
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, sortOrder])
+}
+
 model Denomination {
   id        String   @id @default(cuid())
   gameId    String

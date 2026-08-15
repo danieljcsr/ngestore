@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { GameCard } from "@/components/home/GameCard";
 import { GameSearchBar } from "@/components/home/GameSearchBar";
+import { BannerSlider } from "@/components/home/BannerSlider";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/cn";
 import { GAME_CATEGORIES, type GameCategory } from "@/lib/types";
@@ -25,22 +26,29 @@ export default async function GamesPage({
   const query = q?.trim() ?? "";
   const category = isCategory(rawCategory) ? rawCategory : undefined;
 
-  const games = await prisma.game.findMany({
-    where: {
-      isActive: true,
-      ...(category ? { category } : {}),
-    },
-    orderBy: { sortOrder: "asc" },
-    select: {
-      slug: true,
-      name: true,
-      category: true,
-      badgeLabel: true,
-      badgeFrom: true,
-      badgeTo: true,
-      imageUrl: true,
-    },
-  });
+  const [games, banners] = await Promise.all([
+    prisma.game.findMany({
+      where: {
+        isActive: true,
+        ...(category ? { category } : {}),
+      },
+      orderBy: { sortOrder: "asc" },
+      select: {
+        slug: true,
+        name: true,
+        category: true,
+        badgeLabel: true,
+        badgeFrom: true,
+        badgeTo: true,
+        imageUrl: true,
+      },
+    }),
+    prisma.banner.findMany({
+      where: { isActive: true },
+      orderBy: { sortOrder: "asc" },
+      select: { id: true, imageUrl: true, linkUrl: true, altText: true },
+    }),
+  ]);
 
   // Filtered in application code rather than via Prisma's `contains` so search is
   // reliably case-insensitive on every database provider — Postgres (production)
@@ -66,6 +74,8 @@ export default async function GamesPage({
 
   return (
     <Container className="py-10 sm:py-14">
+      <BannerSlider banners={banners} />
+
       <div className="mb-8 text-center sm:mb-10">
         <h1 className="font-display text-4xl font-bold uppercase tracking-wide text-foreground sm:text-5xl">
           Semua <span className="text-gradient-brand">Game</span>

@@ -22,6 +22,7 @@ export default async function AdminDashboardLayout({
     { href: "/admin", label: "Ringkasan" },
     { href: "/admin/orders", label: "Pesanan" },
     { href: "/admin/games", label: "Katalog Game" },
+    { href: "/admin/banners", label: "Banner Slider" },
     { href: "/admin/settings", label: "Pengaturan Provider" },
     { href: "/admin/maintenance", label: "Jam Operasional" },
     { href: "/admin/contact", label: "Kontak & CS" },
