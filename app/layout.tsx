@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Rajdhani } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { getSiteContactSettings } from "@/lib/site-contact";
 import { Header } from "@/components/layout/Header";
@@ -53,6 +54,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <Header />
         <main className="flex-1">{children}</main>
         <Footer csWhatsapp={contact.csWhatsapp} csEmail={contact.csEmail} />
+        <SpeedInsights />
       </body>
     </html>
   );
