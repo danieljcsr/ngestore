@@ -95,7 +95,12 @@ export async function POST(request: NextRequest) {
 
   const refId = firstString(data, ["ref_id", "reference_id", "request_id", "REQUESTID", "trx_id"]);
   const message = firstString(data, ["message", "msg", "description", "MESSAGE"]);
-  const trxId = firstString(data, ["trxid", "trx_id", "sn", "transaction_id", "TRANSACTIONID", "SN"]);
+  // `sn` is the actual redeemable serial/voucher code — what the customer
+  // needs — while `trxid`/`transaction_id` is just the provider's internal
+  // reference. Same priority fix as lib/provider.ts's dispatch path: found
+  // live when a completed Roblox order displayed the internal trxid instead
+  // of the real voucher SN, because this callback checked trxid first.
+  const trxId = firstString(data, ["sn", "SN", "trxid", "trx_id", "transaction_id", "TRANSACTIONID"]);
   const statusRaw = firstString(data, [
     "rc",
     "RESPONSECODE",
