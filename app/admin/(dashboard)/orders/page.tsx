@@ -150,6 +150,7 @@ export default async function AdminOrdersPage({
                         id: order.id,
                         status: order.status as OrderStatus,
                         adminNote: order.adminNote,
+                        providerTrxId: order.providerTrxId,
                       }}
                     />
                   </td>

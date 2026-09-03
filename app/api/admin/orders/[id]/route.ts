@@ -18,12 +18,13 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     return NextResponse.json({ error: "Pesanan tidak ditemukan." }, { status: 404 });
   }
 
-  const { status, adminNote } = parsed.data;
+  const { status, adminNote, providerTrxId } = parsed.data;
 
   const data: {
     status?: string;
     adminNote?: string;
     fulfilledAt?: Date;
+    providerTrxId?: string | null;
   } = {};
 
   if (status !== undefined) {
@@ -35,6 +36,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
   if (adminNote !== undefined) {
     data.adminNote = adminNote;
+  }
+
+  if (providerTrxId !== undefined) {
+    data.providerTrxId = providerTrxId;
   }
 
   const updated = await prisma.order.update({

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Textarea } from "@/components/ui/Input";
+import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import type { OrderStatus } from "@/lib/types";
@@ -22,6 +22,7 @@ type OrderActionsProps = {
     id: string;
     status: OrderStatus;
     adminNote: string | null;
+    providerTrxId: string | null;
   };
 };
 
@@ -31,6 +32,7 @@ export function OrderActions({ order }: OrderActionsProps) {
   const router = useRouter();
   const [status, setStatus] = useState<OrderStatus>(order.status);
   const [adminNote, setAdminNote] = useState(order.adminNote ?? "");
+  const [providerTrxId, setProviderTrxId] = useState(order.providerTrxId ?? "");
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDispatching, setIsDispatching] = useState(false);
@@ -62,7 +64,7 @@ export function OrderActions({ order }: OrderActionsProps) {
       const res = await fetch(`/api/admin/orders/${order.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status, adminNote }),
+        body: JSON.stringify({ status, adminNote, providerTrxId: providerTrxId.trim() || null }),
       });
 
       if (!res.ok) {
@@ -104,6 +106,14 @@ export function OrderActions({ order }: OrderActionsProps) {
         rows={2}
         maxLength={500}
         className="text-xs"
+      />
+
+      <Input
+        value={providerTrxId}
+        onChange={(e) => setProviderTrxId(e.target.value)}
+        placeholder="Kode Voucher/SN (opsional)"
+        maxLength={200}
+        className="py-1.5 text-xs font-mono"
       />
 
       {error ? <p className="text-xs text-danger">{error}</p> : null}
