@@ -52,11 +52,17 @@ function buildSignature(username: string, apiKey: string, refId: string): string
 
 // Digiflazz's own convention for games that need a server/zone id (e.g.
 // Mobile Legends) is "<user_id> <zone_id>" — space separated. Other
-// providers document this destination field as numbers-only and misparse a
-// space, so the join character is admin-configurable (ProviderSetting.zoneSeparator)
-// rather than hardcoded.
-function buildCustomerNo(playerId: string, zoneId: string | null, separator: string): string {
-  return zoneId ? `${playerId}${separator}${zoneId}` : playerId;
+// providers resolve the zone on their own end and want the bare player ID
+// only (confirmed live with Media Cakrawangsa — appending zoneId there made
+// the destination unrecognized), so both whether to include it at all and
+// what to join it with are admin-configurable rather than hardcoded.
+function buildCustomerNo(
+  playerId: string,
+  zoneId: string | null,
+  includeZoneId: boolean,
+  separator: string,
+): string {
+  return zoneId && includeZoneId ? `${playerId}${separator}${zoneId}` : playerId;
 }
 
 type UnknownRecord = Record<string, unknown>;
@@ -184,7 +190,12 @@ export async function dispatchOrderToProvider(orderId: string): Promise<Provider
   }
 
   const refId = order.providerRefId ?? order.orderCode;
-  const customerNo = buildCustomerNo(order.playerId, order.zoneId, settings.zoneSeparator);
+  const customerNo = buildCustomerNo(
+    order.playerId,
+    order.zoneId,
+    settings.includeZoneId,
+    settings.zoneSeparator,
+  );
 
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   let body: UnknownRecord;

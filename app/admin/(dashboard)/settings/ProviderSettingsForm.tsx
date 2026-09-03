@@ -19,6 +19,7 @@ type ProviderSettingsData = {
   transactionPin: string | null;
   outboundProxyUrl: string | null;
   callbackToken: string | null;
+  includeZoneId: boolean;
   zoneSeparator: string;
 };
 
@@ -46,6 +47,7 @@ export function ProviderSettingsForm({
   const [useMd5Signature, setUseMd5Signature] = useState(settings.useMd5Signature);
   const [transactionPin, setTransactionPin] = useState(settings.transactionPin ?? "");
   const [showPin, setShowPin] = useState(false);
+  const [includeZoneId, setIncludeZoneId] = useState(settings.includeZoneId);
   const [zoneSeparator, setZoneSeparator] = useState(settings.zoneSeparator);
   const [outboundProxyUrl, setOutboundProxyUrl] = useState(settings.outboundProxyUrl ?? "");
   const [callbackToken, setCallbackToken] = useState(settings.callbackToken ?? "");
@@ -92,6 +94,7 @@ export function ProviderSettingsForm({
           requestFormat,
           useMd5Signature,
           transactionPin: transactionPin.trim() || null,
+          includeZoneId,
           zoneSeparator,
           outboundProxyUrl: outboundProxyUrl.trim() || null,
           callbackToken: callbackToken.trim() || null,
@@ -252,21 +255,44 @@ export function ProviderSettingsForm({
         </div>
 
         <div>
-          <Label htmlFor="zoneSeparator">Pemisah ID Pemain &amp; Zone ID</Label>
-          <Input
-            id="zoneSeparator"
-            value={zoneSeparator}
-            onChange={(e) => setZoneSeparator(e.target.value)}
-            placeholder="Spasi (kosongkan untuk tanpa pemisah)"
-            className="font-mono"
-          />
-          <p className="mt-1 text-xs text-muted">
-            Untuk game yang butuh Zone ID (misal Mobile Legends), ID Pemain dan Zone ID
-            digabung jadi satu sebelum dikirim ke provider — misal &ldquo;12345 678&rdquo;.
-            Kalau provider Anda mendokumentasikan field ini sebagai &ldquo;angka saja&rdquo;
-            dan menolak/salah baca tujuan, coba kosongkan field ini (tanpa pemisah) atau
-            ganti ke karakter lain sesuai yang provider minta. Default: spasi.
-          </p>
+          <label className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              checked={includeZoneId}
+              onChange={(e) => setIncludeZoneId(e.target.checked)}
+              className="h-5 w-5 rounded border-border bg-surface-2 accent-brand-indigo"
+            />
+            <span>
+              <span className="block text-sm font-semibold text-foreground">
+                Sertakan Zone ID untuk game yang membutuhkannya
+              </span>
+              <span className="block text-xs text-muted">
+                Matikan kalau provider Anda menolak transaksi game seperti Mobile Legends
+                (konfirmasi dari provider: mereka cuma butuh ID Pemain saja, Zone ID
+                diproses otomatis di sistem mereka).
+              </span>
+            </span>
+          </label>
+
+          {includeZoneId && (
+            <div className="mt-4">
+              <Label htmlFor="zoneSeparator">Pemisah ID Pemain &amp; Zone ID</Label>
+              <Input
+                id="zoneSeparator"
+                value={zoneSeparator}
+                onChange={(e) => setZoneSeparator(e.target.value)}
+                placeholder="Spasi (kosongkan untuk tanpa pemisah)"
+                className="font-mono"
+              />
+              <p className="mt-1 text-xs text-muted">
+                ID Pemain dan Zone ID digabung jadi satu sebelum dikirim ke provider —
+                misal &ldquo;12345 678&rdquo;. Kalau provider Anda mendokumentasikan field
+                ini sebagai &ldquo;angka saja&rdquo; dan menolak/salah baca tujuan, coba
+                kosongkan field ini (tanpa pemisah) atau ganti ke karakter lain sesuai yang
+                provider minta. Default: spasi.
+              </p>
+            </div>
+          )}
         </div>
 
         {requestFormat === "digiflazz" && (

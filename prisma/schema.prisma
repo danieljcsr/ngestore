@@ -174,12 +174,16 @@ model ProviderSetting {
   // Shared secret the provider's callback URL must include (as ?token=... or
   // an X-Callback-Token header) before an inbound status update is trusted.
   callbackToken String?
-  // How playerId and zoneId are joined into the single destination field
-  // (customer_no/msisdn) for games that need a zone/server id, e.g. Mobile
-  // Legends. Default is a space (Digiflazz's own convention), but providers
-  // that document that field as "numbers only" (e.g. Media Cakrawangsa) may
-  // reject or misparse a space — make this an empty string to concatenate
-  // with no separator instead, or any other character your provider expects.
+  // Whether zoneId gets appended to playerId at all when building the
+  // destination field (customer_no/msisdn) sent to the provider. Digiflazz's
+  // own convention needs it for zone-based games (e.g. Mobile Legends), but
+  // some providers (confirmed live with Media Cakrawangsa) resolve the zone
+  // on their own end and want the bare player ID only — appending zoneId
+  // there makes the destination unrecognized and the transaction fails.
+  includeZoneId Boolean @default(true)
+  // How playerId and zoneId are joined when includeZoneId is true. Default
+  // is a space (Digiflazz's own convention); change to empty or another
+  // character if your provider's docs say otherwise.
   zoneSeparator String @default(" ")
 
   createdAt DateTime @default(now())
