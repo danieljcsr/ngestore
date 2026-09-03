@@ -9,7 +9,7 @@ export default async function OrderPage(props: { params: Promise<{ code: string 
 
   const order = await prisma.order.findUnique({
     where: { orderCode: code },
-    include: { game: { select: { requiresPlayerId: true } } },
+    include: { game: { select: { requiresPlayerId: true, instructions: true } } },
   });
 
   if (!order) {
@@ -41,6 +41,7 @@ export default async function OrderPage(props: { params: Promise<{ code: string 
     zoneId: order.zoneId,
     status: order.status as OrderStatus,
     voucherCode: order.status === "COMPLETED" ? order.providerTrxId : null,
+    redeemInstructions: !order.game.requiresPlayerId ? order.game.instructions : null,
     createdAt: order.createdAt.toISOString(),
     paidAt: order.paidAt ? order.paidAt.toISOString() : null,
     fulfilledAt: order.fulfilledAt ? order.fulfilledAt.toISOString() : null,

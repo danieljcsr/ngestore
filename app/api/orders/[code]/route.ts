@@ -9,7 +9,7 @@ export async function GET(
 
   const order = await prisma.order.findUnique({
     where: { orderCode: code },
-    include: { game: { select: { requiresPlayerId: true } } },
+    include: { game: { select: { requiresPlayerId: true, instructions: true } } },
   });
 
   if (!order) {
@@ -29,6 +29,10 @@ export async function GET(
     // provider returned (see lib/provider.ts: `sn` is preferred over `trxid`
     // precisely so this holds a redeemable code, not an internal reference).
     voucherCode: order.status === "COMPLETED" ? order.providerTrxId : null,
+    // Game.instructions is dual-purpose by design: for player-ID games it's
+    // "how to find your ID" (shown pre-checkout); for voucher games
+    // (requiresPlayerId false) it's "how to redeem" (shown here instead).
+    redeemInstructions: !order.game.requiresPlayerId ? order.game.instructions : null,
     createdAt: order.createdAt.toISOString(),
     paidAt: order.paidAt ? order.paidAt.toISOString() : null,
     fulfilledAt: order.fulfilledAt ? order.fulfilledAt.toISOString() : null,

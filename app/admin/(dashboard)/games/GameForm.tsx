@@ -393,15 +393,26 @@ export function GameForm({ mode, game }: Props) {
         )}
 
         <div>
-          <Label htmlFor="instructions">Instruksi (opsional)</Label>
+          <Label htmlFor="instructions">
+            {requiresPlayerId ? "Instruksi (opsional)" : "Cara Redeem Voucher (opsional)"}
+          </Label>
           <Textarea
             id="instructions"
             value={instructions}
             onChange={(e) => setInstructions(e.target.value)}
             rows={4}
             maxLength={2000}
-            placeholder="Contoh: Cara menemukan User ID dan Zone ID di dalam game."
+            placeholder={
+              requiresPlayerId
+                ? "Contoh: Cara menemukan User ID dan Zone ID di dalam game."
+                : "Contoh: Buka roblox.com/redeem, login, lalu masukkan kode voucher ini."
+            }
           />
+          <p className="mt-1 text-xs text-muted">
+            {requiresPlayerId
+              ? "Tampil di halaman produk, sebelum pelanggan checkout."
+              : "Tampil di halaman pesanan pelanggan, di bawah kode voucher, setelah pesanan selesai."}
+          </p>
           {fieldError("instructions") && (
             <p className="mt-1 text-xs text-danger">{fieldError("instructions")}</p>
           )}

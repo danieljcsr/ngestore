@@ -17,6 +17,7 @@ export type OrderStatusViewData = {
   zoneId: string | null;
   status: OrderStatus;
   voucherCode: string | null;
+  redeemInstructions: string | null;
   createdAt: string;
   paidAt: string | null;
   fulfilledAt: string | null;
@@ -101,6 +102,15 @@ export function OrderStatusView({ order }: { order: OrderStatusViewData }) {
               </p>
               <p className="mt-1 text-xs text-muted">
                 Simpan kode ini dan redeem langsung di akunmu.
+              </p>
+            </div>
+          )}
+
+          {data.voucherCode && data.redeemInstructions && (
+            <div className="mt-4 rounded-xl border border-border bg-surface-2 p-4">
+              <p className="text-sm font-semibold text-foreground">Cara Redeem</p>
+              <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted">
+                {data.redeemInstructions}
               </p>
             </div>
           )}
