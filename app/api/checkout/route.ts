@@ -82,9 +82,11 @@ export async function POST(request: NextRequest) {
         // Pure voucher products (Game.requiresPlayerId = false) don't collect
         // a real destination — playerId stays required (NOT NULL) on Order for
         // every other consumer's sake (admin list, provider dispatch), so fall
-        // back to the order code itself: unique, always present, and still a
-        // meaningful value if anyone ever needs to trace it back.
-        playerId: playerId && playerId.trim().length > 0 ? playerId : orderCode,
+        // back to the customer's WhatsApp number: unlike the order code, it's
+        // digits-only, which matches what providers document that
+        // destination field as ("numbers only") for voucher/pin products
+        // that don't have a real account to target.
+        playerId: playerId && playerId.trim().length > 0 ? playerId : contactWhatsapp,
         zoneId: zoneId && zoneId.trim().length > 0 ? zoneId : null,
         contactName,
         contactWhatsapp,
