@@ -51,11 +51,12 @@ function buildSignature(username: string, apiKey: string, refId: string): string
 }
 
 // Digiflazz's own convention for games that need a server/zone id (e.g.
-// Mobile Legends) is "<user_id> <zone_id>" — space separated. Some specific
-// products deviate from this; adjust here if your provider needs something
-// else for a given SKU.
-function buildCustomerNo(playerId: string, zoneId: string | null): string {
-  return zoneId ? `${playerId} ${zoneId}` : playerId;
+// Mobile Legends) is "<user_id> <zone_id>" — space separated. Other
+// providers document this destination field as numbers-only and misparse a
+// space, so the join character is admin-configurable (ProviderSetting.zoneSeparator)
+// rather than hardcoded.
+function buildCustomerNo(playerId: string, zoneId: string | null, separator: string): string {
+  return zoneId ? `${playerId}${separator}${zoneId}` : playerId;
 }
 
 type UnknownRecord = Record<string, unknown>;
@@ -183,7 +184,7 @@ export async function dispatchOrderToProvider(orderId: string): Promise<Provider
   }
 
   const refId = order.providerRefId ?? order.orderCode;
-  const customerNo = buildCustomerNo(order.playerId, order.zoneId);
+  const customerNo = buildCustomerNo(order.playerId, order.zoneId, settings.zoneSeparator);
 
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   let body: UnknownRecord;

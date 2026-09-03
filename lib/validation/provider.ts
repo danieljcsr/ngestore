@@ -15,4 +15,5 @@ export const providerSettingSchema = z.object({
   transactionPin: z.string().max(50).nullable().optional(),
   outboundProxyUrl: z.string().url().max(500).nullable().optional(),
   callbackToken: z.string().max(200).nullable().optional(),
+  zoneSeparator: z.string().max(10).optional(),
 });

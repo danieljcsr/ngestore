@@ -48,6 +48,7 @@ export async function PATCH(request: NextRequest) {
           ? { outboundProxyUrl: data.outboundProxyUrl }
           : {}),
         ...(data.callbackToken !== undefined ? { callbackToken: data.callbackToken } : {}),
+        ...(data.zoneSeparator !== undefined ? { zoneSeparator: data.zoneSeparator } : {}),
       },
     });
 

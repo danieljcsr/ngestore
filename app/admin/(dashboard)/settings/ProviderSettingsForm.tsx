@@ -19,6 +19,7 @@ type ProviderSettingsData = {
   transactionPin: string | null;
   outboundProxyUrl: string | null;
   callbackToken: string | null;
+  zoneSeparator: string;
 };
 
 function randomToken(): string {
@@ -45,6 +46,7 @@ export function ProviderSettingsForm({
   const [useMd5Signature, setUseMd5Signature] = useState(settings.useMd5Signature);
   const [transactionPin, setTransactionPin] = useState(settings.transactionPin ?? "");
   const [showPin, setShowPin] = useState(false);
+  const [zoneSeparator, setZoneSeparator] = useState(settings.zoneSeparator);
   const [outboundProxyUrl, setOutboundProxyUrl] = useState(settings.outboundProxyUrl ?? "");
   const [callbackToken, setCallbackToken] = useState(settings.callbackToken ?? "");
   const [saving, setSaving] = useState(false);
@@ -90,6 +92,7 @@ export function ProviderSettingsForm({
           requestFormat,
           useMd5Signature,
           transactionPin: transactionPin.trim() || null,
+          zoneSeparator,
           outboundProxyUrl: outboundProxyUrl.trim() || null,
           callbackToken: callbackToken.trim() || null,
         }),
@@ -245,6 +248,24 @@ export function ProviderSettingsForm({
           <p className="mt-1 text-xs text-muted">
             Beberapa provider mewajibkan PIN transaksi tambahan (biasanya dipasangkan
             dengan whitelist IP). Diisi otomatis ke tiap request kalau field ini terisi.
+          </p>
+        </div>
+
+        <div>
+          <Label htmlFor="zoneSeparator">Pemisah ID Pemain &amp; Zone ID</Label>
+          <Input
+            id="zoneSeparator"
+            value={zoneSeparator}
+            onChange={(e) => setZoneSeparator(e.target.value)}
+            placeholder="Spasi (kosongkan untuk tanpa pemisah)"
+            className="font-mono"
+          />
+          <p className="mt-1 text-xs text-muted">
+            Untuk game yang butuh Zone ID (misal Mobile Legends), ID Pemain dan Zone ID
+            digabung jadi satu sebelum dikirim ke provider — misal &ldquo;12345 678&rdquo;.
+            Kalau provider Anda mendokumentasikan field ini sebagai &ldquo;angka saja&rdquo;
+            dan menolak/salah baca tujuan, coba kosongkan field ini (tanpa pemisah) atau
+            ganti ke karakter lain sesuai yang provider minta. Default: spasi.
           </p>
         </div>
 

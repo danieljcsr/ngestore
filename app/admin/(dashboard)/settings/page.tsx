@@ -28,6 +28,7 @@ export default async function ProviderSettingsPage() {
           transactionPin: settings.transactionPin,
           outboundProxyUrl: settings.outboundProxyUrl,
           callbackToken: settings.callbackToken,
+          zoneSeparator: settings.zoneSeparator,
         }}
         siteUrl={siteUrl}
       />
