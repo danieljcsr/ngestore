@@ -13,6 +13,7 @@ type GameData = {
   id: string;
   name: string;
   slug: string;
+  requiresPlayerId: boolean;
   requiresZoneId: boolean;
   playerIdLabel: string;
   zoneIdLabel: string;
@@ -78,7 +79,7 @@ export function CheckoutForm({
     !maintenanceActive &&
     !submitting &&
     selectedDenomination !== null &&
-    playerId.trim().length > 0 &&
+    (!game.requiresPlayerId || playerId.trim().length > 0) &&
     (!game.requiresZoneId || zoneId.trim().length > 0) &&
     contactName.trim().length >= 2 &&
     contactWhatsapp.trim().length >= 9;
@@ -97,7 +98,7 @@ export function CheckoutForm({
         body: JSON.stringify({
           gameId: game.id,
           denominationId: selectedDenomination.id,
-          playerId: playerId.trim(),
+          playerId: game.requiresPlayerId ? playerId.trim() : undefined,
           zoneId: game.requiresZoneId ? zoneId.trim() : undefined,
           contactName: contactName.trim(),
           contactWhatsapp: contactWhatsapp.trim(),
@@ -221,33 +222,45 @@ export function CheckoutForm({
             )}
           </Card>
 
-          <Card className="p-4 sm:p-5">
-            <h2 className="text-base font-semibold text-foreground">Data Akun</h2>
-            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <Label htmlFor="playerId">{game.playerIdLabel}</Label>
-                <Input
-                  id="playerId"
-                  value={playerId}
-                  onChange={(e) => setPlayerId(e.target.value)}
-                  placeholder={`Masukkan ${game.playerIdLabel}`}
-                  required
-                />
-              </div>
-              {game.requiresZoneId && (
+          {!game.requiresPlayerId && (
+            <Card className="p-4 sm:p-5">
+              <p className="text-sm text-foreground/90">
+                Produk ini berupa kode voucher — tidak perlu ID akun apa pun. Setelah
+                pembayaran berhasil, kode voucher-nya akan tampil di halaman pesanan
+                kamu untuk di-redeem sendiri.
+              </p>
+            </Card>
+          )}
+
+          {game.requiresPlayerId && (
+            <Card className="p-4 sm:p-5">
+              <h2 className="text-base font-semibold text-foreground">Data Akun</h2>
+              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <Label htmlFor="zoneId">{game.zoneIdLabel}</Label>
+                  <Label htmlFor="playerId">{game.playerIdLabel}</Label>
                   <Input
-                    id="zoneId"
-                    value={zoneId}
-                    onChange={(e) => setZoneId(e.target.value)}
-                    placeholder={`Masukkan ${game.zoneIdLabel}`}
+                    id="playerId"
+                    value={playerId}
+                    onChange={(e) => setPlayerId(e.target.value)}
+                    placeholder={`Masukkan ${game.playerIdLabel}`}
                     required
                   />
                 </div>
-              )}
-            </div>
-          </Card>
+                {game.requiresZoneId && (
+                  <div>
+                    <Label htmlFor="zoneId">{game.zoneIdLabel}</Label>
+                    <Input
+                      id="zoneId"
+                      value={zoneId}
+                      onChange={(e) => setZoneId(e.target.value)}
+                      placeholder={`Masukkan ${game.zoneIdLabel}`}
+                      required
+                    />
+                  </div>
+                )}
+              </div>
+            </Card>
+          )}
 
           <Card className="p-4 sm:p-5">
             <h2 className="text-base font-semibold text-foreground">Data Kontak</h2>

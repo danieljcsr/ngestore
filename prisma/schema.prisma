@@ -31,6 +31,10 @@ model Game {
   // Optional uploaded cover image (JPG/PNG/WEBP via Vercel Blob). When null,
   // the storefront falls back to the generated badgeLabel/badgeFrom/badgeTo icon.
   imageUrl        String?
+  // Off for pure voucher/code products (e.g. Roblox gift codes) where the
+  // customer doesn't have an account destination at all — the delivered
+  // code is just shown to them on the order page to redeem themselves.
+  requiresPlayerId Boolean @default(true)
   requiresZoneId  Boolean  @default(false)
   playerIdLabel   String   @default("User ID")
   zoneIdLabel     String   @default("Zone ID")

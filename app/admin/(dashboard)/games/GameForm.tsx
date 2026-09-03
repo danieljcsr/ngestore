@@ -17,6 +17,7 @@ type GameData = {
   badgeFrom: string;
   badgeTo: string;
   imageUrl: string | null;
+  requiresPlayerId: boolean;
   requiresZoneId: boolean;
   playerIdLabel: string;
   zoneIdLabel: string;
@@ -52,6 +53,7 @@ export function GameForm({ mode, game }: Props) {
   const [imageUrl, setImageUrl] = useState<string | null>(game?.imageUrl ?? null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [requiresPlayerId, setRequiresPlayerId] = useState(game?.requiresPlayerId ?? true);
   const [requiresZoneId, setRequiresZoneId] = useState(game?.requiresZoneId ?? false);
   const [playerIdLabel, setPlayerIdLabel] = useState(game?.playerIdLabel ?? "User ID");
   const [zoneIdLabel, setZoneIdLabel] = useState(game?.zoneIdLabel ?? "Zone ID");
@@ -118,6 +120,7 @@ export function GameForm({ mode, game }: Props) {
       badgeFrom,
       badgeTo,
       imageUrl,
+      requiresPlayerId,
       requiresZoneId,
       // Send the field as typed (even if empty) rather than coercing "" to undefined:
       // undefined means "leave unchanged" to the API, so coercing would make clearing
@@ -325,47 +328,69 @@ export function GameForm({ mode, game }: Props) {
 
         <div className="flex items-center gap-2">
           <input
-            id="requiresZoneId"
+            id="requiresPlayerId"
             type="checkbox"
-            checked={requiresZoneId}
-            onChange={(e) => setRequiresZoneId(e.target.checked)}
+            checked={requiresPlayerId}
+            onChange={(e) => setRequiresPlayerId(e.target.checked)}
             className="h-4 w-4 rounded border-border bg-surface-2 accent-brand-indigo"
           />
-          <Label htmlFor="requiresZoneId" className="mb-0">
-            Wajib isi Zone ID?
+          <Label htmlFor="requiresPlayerId" className="mb-0">
+            Wajib isi ID Pemain?
           </Label>
         </div>
+        <p className="-mt-4 text-xs text-muted">
+          Matikan untuk produk voucher/kode murni (misal Roblox) yang tidak ditujukan ke
+          akun tertentu — pelanggan tidak diminta isi ID apa pun saat checkout, kode
+          voucher-nya langsung ditampilkan di halaman pesanan untuk mereka redeem sendiri.
+        </p>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <Label htmlFor="playerIdLabel">Label Player ID</Label>
-            <Input
-              id="playerIdLabel"
-              value={playerIdLabel}
-              onChange={(e) => setPlayerIdLabel(e.target.value)}
-              maxLength={50}
-              placeholder="User ID"
+        {requiresPlayerId && (
+          <div className="flex items-center gap-2">
+            <input
+              id="requiresZoneId"
+              type="checkbox"
+              checked={requiresZoneId}
+              onChange={(e) => setRequiresZoneId(e.target.checked)}
+              className="h-4 w-4 rounded border-border bg-surface-2 accent-brand-indigo"
             />
-            {fieldError("playerIdLabel") && (
-              <p className="mt-1 text-xs text-danger">{fieldError("playerIdLabel")}</p>
-            )}
+            <Label htmlFor="requiresZoneId" className="mb-0">
+              Wajib isi Zone ID?
+            </Label>
           </div>
-          {requiresZoneId && (
+        )}
+
+        {requiresPlayerId && (
+          <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="zoneIdLabel">Label Zone ID</Label>
+              <Label htmlFor="playerIdLabel">Label Player ID</Label>
               <Input
-                id="zoneIdLabel"
-                value={zoneIdLabel}
-                onChange={(e) => setZoneIdLabel(e.target.value)}
+                id="playerIdLabel"
+                value={playerIdLabel}
+                onChange={(e) => setPlayerIdLabel(e.target.value)}
                 maxLength={50}
-                placeholder="Zone ID"
+                placeholder="User ID"
               />
-              {fieldError("zoneIdLabel") && (
-                <p className="mt-1 text-xs text-danger">{fieldError("zoneIdLabel")}</p>
+              {fieldError("playerIdLabel") && (
+                <p className="mt-1 text-xs text-danger">{fieldError("playerIdLabel")}</p>
               )}
             </div>
-          )}
-        </div>
+            {requiresZoneId && (
+              <div>
+                <Label htmlFor="zoneIdLabel">Label Zone ID</Label>
+                <Input
+                  id="zoneIdLabel"
+                  value={zoneIdLabel}
+                  onChange={(e) => setZoneIdLabel(e.target.value)}
+                  maxLength={50}
+                  placeholder="Zone ID"
+                />
+                {fieldError("zoneIdLabel") && (
+                  <p className="mt-1 text-xs text-danger">{fieldError("zoneIdLabel")}</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         <div>
           <Label htmlFor="instructions">Instruksi (opsional)</Label>

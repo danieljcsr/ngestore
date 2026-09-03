@@ -54,6 +54,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (game.requiresPlayerId && (!playerId || playerId.trim().length === 0)) {
+      return NextResponse.json(
+        { error: "ID Player wajib diisi untuk game ini." },
+        { status: 400 },
+      );
+    }
+
     if (game.requiresZoneId && (!zoneId || zoneId.trim().length === 0)) {
       return NextResponse.json(
         { error: "Zone ID wajib diisi untuk game ini." },
@@ -72,7 +79,12 @@ export async function POST(request: NextRequest) {
         denominationId: denomination.id,
         denominationName: denomination.name,
         amount,
-        playerId,
+        // Pure voucher products (Game.requiresPlayerId = false) don't collect
+        // a real destination — playerId stays required (NOT NULL) on Order for
+        // every other consumer's sake (admin list, provider dispatch), so fall
+        // back to the order code itself: unique, always present, and still a
+        // meaningful value if anyone ever needs to trace it back.
+        playerId: playerId && playerId.trim().length > 0 ? playerId : orderCode,
         zoneId: zoneId && zoneId.trim().length > 0 ? zoneId : null,
         contactName,
         contactWhatsapp,

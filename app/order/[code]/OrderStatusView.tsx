@@ -12,13 +12,21 @@ export type OrderStatusViewData = {
   gameName: string;
   denominationName: string;
   amount: number;
+  requiresPlayerId: boolean;
   playerId: string;
   zoneId: string | null;
   status: OrderStatus;
+  voucherCode: string | null;
   createdAt: string;
   paidAt: string | null;
   fulfilledAt: string | null;
 };
+
+// Orders needing provider fulfillment can still be moving (PAID -> PROCESSING
+// -> COMPLETED) well after payment is confirmed — keep polling through those
+// so a voucher code (or "Diamond masuk") appears live without a manual
+// refresh. PENDING_PAYMENT is included for the pre-existing payment-wait case.
+const LIVE_STATUSES: OrderStatus[] = ["PENDING_PAYMENT", "PAID", "PROCESSING"];
 
 const STATUS_MESSAGE: Record<OrderStatus, string> = {
   PENDING_PAYMENT: "Menunggu pembayaran kamu. Selesaikan pembayaran untuk melanjutkan.",
@@ -32,10 +40,10 @@ const STATUS_MESSAGE: Record<OrderStatus, string> = {
 
 export function OrderStatusView({ order }: { order: OrderStatusViewData }) {
   const [data, setData] = useState<OrderStatusViewData>(order);
-  const isPolling = data.status === "PENDING_PAYMENT";
+  const isPolling = LIVE_STATUSES.includes(data.status);
 
   useEffect(() => {
-    if (data.status !== "PENDING_PAYMENT") return;
+    if (!LIVE_STATUSES.includes(data.status)) return;
 
     let cancelled = false;
     const interval = setInterval(async () => {
@@ -83,10 +91,24 @@ export function OrderStatusView({ order }: { order: OrderStatusViewData }) {
             </div>
           )}
 
+          {data.voucherCode && (
+            <div className="mt-6 rounded-xl border border-success/30 bg-success/10 p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-success">
+                Kode Voucher Kamu
+              </p>
+              <p className="mt-1 break-all font-mono text-lg font-bold text-foreground">
+                {data.voucherCode}
+              </p>
+              <p className="mt-1 text-xs text-muted">
+                Simpan kode ini dan redeem langsung di akunmu.
+              </p>
+            </div>
+          )}
+
           <dl className="mt-6 divide-y divide-border border-t border-border">
             <Row label="Game" value={data.gameName} />
             <Row label="Nominal" value={data.denominationName} />
-            <Row label="Player ID" value={data.playerId} />
+            {data.requiresPlayerId && <Row label="Player ID" value={data.playerId} />}
             {data.zoneId && <Row label="Zone ID" value={data.zoneId} />}
             <Row label="Total Bayar" value={formatRupiah(data.amount)} />
             <Row label="Tanggal Pesanan" value={formatDateTime(data.createdAt)} />

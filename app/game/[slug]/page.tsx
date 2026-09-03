@@ -37,6 +37,7 @@ export default async function GameDetailPage(props: {
     id: game.id,
     name: game.name,
     slug: game.slug,
+    requiresPlayerId: game.requiresPlayerId,
     requiresZoneId: game.requiresZoneId,
     playerIdLabel: game.playerIdLabel,
     zoneIdLabel: game.zoneIdLabel,
@@ -69,7 +70,7 @@ export default async function GameDetailPage(props: {
         </div>
       </div>
 
-      {game.instructions && (
+      {game.requiresPlayerId && game.instructions && (
         <Card className="mt-6 p-4 sm:p-5">
           <h2 className="text-sm font-semibold text-brand-cyan">Cara Menemukan ID Kamu</h2>
           <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted">

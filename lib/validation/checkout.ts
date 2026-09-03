@@ -3,7 +3,10 @@ import { z } from "zod";
 export const checkoutSchema = z.object({
   gameId: z.string().min(1, "Game tidak valid."),
   denominationId: z.string().min(1, "Nominal tidak valid."),
-  playerId: z.string().min(1, "ID Player wajib diisi.").max(100, "ID Player terlalu panjang."),
+  // Required-ness depends on the game (Game.requiresPlayerId) and is enforced
+  // in the checkout route, same pattern as zoneId below — pure voucher
+  // products don't have a player destination at all.
+  playerId: z.string().max(100, "ID Player terlalu panjang.").optional(),
   zoneId: z.string().optional(),
   contactName: z
     .string()
