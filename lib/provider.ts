@@ -189,7 +189,22 @@ export async function dispatchOrderToProvider(orderId: string): Promise<Provider
     };
   }
 
-  const refId = order.providerRefId ?? order.orderCode;
+  // MCW's own docs: resending the same request_id after it's already been
+  // processed just echoes back that original (stale) result instead of
+  // trying again — confirmed live (a corrected retry kept returning the
+  // first failed attempt's exact balance/message). So reuse the existing
+  // ref_id only while the last attempt is still pending/unknown (true
+  // retry-safety, e.g. a network timeout where we're unsure it went
+  // through) — once the provider has actually rejected it, mint a fresh
+  // ref_id so a manual retry after fixing the SKU/destination format is a
+  // genuinely new request.
+  const previousClassification = order.providerStatus
+    ? classifyStatus(format, order.providerStatus)
+    : null;
+  const refId =
+    order.providerRefId && previousClassification !== "failed"
+      ? order.providerRefId
+      : `${order.orderCode}-R${Date.now().toString(36)}`;
   const customerNo = buildCustomerNo(
     order.playerId,
     order.zoneId,
